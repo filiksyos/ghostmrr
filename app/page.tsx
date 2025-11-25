@@ -65,11 +65,13 @@ export default function Home() {
               </pre>
             </div>
             <div className="text-gray-400 text-xs mt-4">
-              1. Paste your Stripe secret key (local only)
+              1. Click the pre-filled link to create a restricted API key (one-click)
               <br />
-              2. CLI calculates MRR and generates signed badge
+              2. Paste your restricted key (rk_live_... or rk_test_...)
               <br />
-              3. Upload verification.json to get verified ✓
+              3. CLI calculates MRR and generates signed badge
+              <br />
+              4. Upload verification.json to get verified ✓
             </div>
           </div>
         </div>

@@ -8,15 +8,20 @@ import * as path from 'path';
 export async function verifyCommand() {
   console.log('\n👻 GhostMRR - Verify Your MRR\n');
 
+  // Show pre-filled link for easy key creation
+  console.log('🔑 To generate a safe, read-only API key:');
+  console.log('   1. Click here: \x1b[36mhttps://dashboard.stripe.com/apikeys/create?name=GhostMRR&permissions[]=rak_subscription_read\x1b[0m');
+  console.log('   2. Click "Create key" and copy the restricted key (rk_live_... or rk_test_...)\n');
+
   // Prompt for Stripe API key
   const { apiKey } = await inquirer.prompt([
     {
       type: 'password',
       name: 'apiKey',
-      message: 'Enter your Stripe Secret Key (sk_live_... or sk_test_...):',
+      message: 'Enter your Stripe Restricted Key (rk_live_... or rk_test_...):',
       validate: (input) => {
-        if (!input.startsWith('sk_')) {
-          return 'Invalid Stripe key format. Must start with sk_';
+        if (!input.startsWith('rk_')) {
+          return 'Invalid Stripe key format. Must be a restricted key starting with rk_';
         }
         return true;
       },
