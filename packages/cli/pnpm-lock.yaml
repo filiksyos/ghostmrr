@@ -18,8 +18,8 @@ importers:
         specifier: ^8.2.6
         version: 8.2.7(@types/node@20.19.25)
       stripe:
-        specifier: ^14.13.0
-        version: 14.25.0
+        specifier: ^20.0.0
+        version: 20.0.0(@types/node@20.19.25)
     devDependencies:
       '@types/inquirer':
         specifier: ^8.2.10
@@ -460,9 +460,14 @@ packages:
     resolution: {integrity: sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==}
     engines: {node: '>=8'}
 
-  stripe@14.25.0:
-    resolution: {integrity: sha512-wQS3GNMofCXwH8TSje8E1SE8zr6ODiGtHQgPtO95p9Mb4FhKC9jvXR2NUTpZ9ZINlckJcFidCmaTFV4P6vsb9g==}
-    engines: {node: '>=12.*'}
+  stripe@20.0.0:
+    resolution: {integrity: sha512-EaZeWpbJOCcDytdjKSwdrL5BxzbDGNueiCfHjHXlPdBQvLqoxl6AAivC35SPzTmVXJb5duXQlXFGS45H0+e6Gg==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@types/node': '>=16'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
 
   supports-color@7.2.0:
     resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
@@ -889,10 +894,11 @@ snapshots:
     dependencies:
       ansi-regex: 5.0.1
 
-  stripe@14.25.0:
+  stripe@20.0.0(@types/node@20.19.25):
     dependencies:
-      '@types/node': 20.19.25
       qs: 6.14.0
+    optionalDependencies:
+      '@types/node': 20.19.25
 
   supports-color@7.2.0:
     dependencies:

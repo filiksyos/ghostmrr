@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import Stripe from 'stripe';
-import { calculateMetrics } from '../stripe/calculator';
-import { generateSignedVerification } from '../crypto/signer';
+import { calculateMetrics } from '../stripe/calculator.js';
+import { generateSignedVerification } from '../crypto/signer.js';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -31,7 +31,7 @@ export async function verifyCommand() {
   console.log('\n🔍 Querying Stripe...');
 
   try {
-    const stripe = new Stripe(apiKey, { apiVersion: '2024-11-20.acacia' });
+    const stripe = new Stripe(apiKey, { apiVersion: '2025-11-17.clover' });
 
     // Calculate metrics
     const metrics = await calculateMetrics(stripe);

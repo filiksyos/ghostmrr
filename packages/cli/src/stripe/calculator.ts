@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { MRRMetrics } from '../types/verification';
+import { MRRMetrics } from '../types/verification.js';
 
 export async function calculateMetrics(stripe: Stripe): Promise<MRRMetrics> {
   // Fetch active subscriptions

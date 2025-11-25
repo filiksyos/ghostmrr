@@ -1,5 +1,5 @@
 import * as ed from '@noble/ed25519';
-import { MRRMetrics, VerificationBadge } from '../types/verification';
+import { MRRMetrics, VerificationBadge } from '../types/verification.js';
 
 export async function generateSignedVerification(
   metrics: MRRMetrics
