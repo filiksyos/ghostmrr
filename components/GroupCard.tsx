@@ -41,9 +41,8 @@ export default function GroupCard({
     <Card className="bg-card border-border hover:border-primary/50 transition-all duration-200 hover:shadow-hover">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center space-x-2 text-lg">
-            {icon && <span>{icon}</span>}
-            <span>{title}</span>
+          <CardTitle className="text-lg">
+            {title}
           </CardTitle>
           <Button onClick={onVerifyClick} size="sm" className="bg-primary hover:bg-primary-dark text-primary-foreground">
             Join

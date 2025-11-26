@@ -92,7 +92,7 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <GroupCard
-                icon="📊"
+                icon=""
                 title="Exact Numbers Leaderboard"
                 description="Show your precise MRR and compete for the #1 spot"
                 memberCount={Math.max(exactNumbersCount, 47)}
@@ -103,7 +103,7 @@ export default function Home() {
               />
 
               <GroupCard
-                icon="🎯"
+                icon=""
                 title=">$10 MRR Club"
                 description="Join verified founders earning $10+ monthly recurring revenue"
                 memberCount={Math.max(tenMRRCount, 153)}
