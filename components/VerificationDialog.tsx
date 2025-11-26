@@ -18,6 +18,7 @@ interface VerificationDialogProps {
 }
 
 export default function VerificationDialog({ open, onOpenChange }: VerificationDialogProps) {
+  const [showInstructions, setShowInstructions] = useState(true);
   const [input, setInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,6 +95,7 @@ export default function VerificationDialog({ open, onOpenChange }: VerificationD
     setError(null);
     setSuccess(false);
     setJoinedGroups([]);
+    setShowInstructions(true);
     onOpenChange(false);
   };
 
@@ -101,42 +103,71 @@ export default function VerificationDialog({ open, onOpenChange }: VerificationD
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] bg-gray-900 border-gray-800">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Verify Your Badge</DialogTitle>
-          <DialogDescription className="text-gray-400">
-            Paste your verification.json file or upload it to join verified groups
-          </DialogDescription>
+          {showInstructions && !success ? (
+            <>
+              <DialogTitle className="text-2xl">Verify Your Revenue Privately</DialogTitle>
+              <DialogDescription className="text-gray-400">
+                Generate a verification.json file using our CLI. No Stripe data ever leaves your device.
+              </DialogDescription>
+            </>
+          ) : !success ? (
+            <>
+              <DialogTitle className="text-2xl">Upload Your Verification File</DialogTitle>
+              <DialogDescription className="text-gray-400">
+                Paste your verification.json or upload the file:
+              </DialogDescription>
+            </>
+          ) : null}
         </DialogHeader>
 
         <div className="space-y-4 mt-4">
-          {!success ? (
+          {showInstructions && !success ? (
             <>
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Paste your verification.json:
-                </label>
-                <textarea
-                  className="w-full h-64 p-4 bg-black border border-gray-800 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
-                  placeholder='{\n  "did": "did:key:z6Mkf...",\n  "metrics": { ... },\n  ...\n}'
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                />
+              <div className="space-y-4">
+                <div className="bg-black p-4 rounded-lg">
+                  <p className="text-xs text-gray-400 mb-2">Run this command in your terminal:</p>
+                  <code className="text-purple-400 font-mono text-sm block">
+                    npx ghostmrr@latest verify
+                  </code>
+                </div>
+
+                <Button
+                  onClick={() => setShowInstructions(false)}
+                  className="w-full bg-primary hover:bg-primary-dark text-primary-foreground"
+                >
+                  I have my verification.json →
+                </Button>
               </div>
+            </>
+          ) : !success ? (
+            <>
+              <div className="mb-2">
+                <Button
+                  onClick={() => setShowInstructions(true)}
+                  variant="ghost"
+                  className="text-sm text-gray-400 hover:text-gray-300 p-0 h-auto"
+                >
+                  ← Back
+                </Button>
+              </div>
+
+              <textarea
+                className="w-full h-64 p-4 bg-black border border-gray-800 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
+                placeholder='{\n  "did": "did:key:z6Mkf...",\n  "metrics": { ... },\n  ...\n}'
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+              />
 
               <div className="flex items-center justify-center">
                 <span className="text-gray-500 text-sm">or</span>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Upload verification.json:
-                </label>
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleFileUpload}
-                  className="w-full p-2 bg-black border border-gray-800 rounded-lg text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-purple-600 file:text-white hover:file:bg-purple-700"
-                />
-              </div>
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleFileUpload}
+                className="w-full p-2 bg-black border border-gray-800 rounded-lg text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-primary file:text-primary-foreground hover:file:bg-primary-dark"
+              />
 
               {error && (
                 <div className="p-4 bg-red-900/20 border border-red-500 rounded-lg">
@@ -147,7 +178,7 @@ export default function VerificationDialog({ open, onOpenChange }: VerificationD
               <Button
                 onClick={handleVerify}
                 disabled={isSubmitting || !input}
-                className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700"
+                className="w-full bg-primary hover:bg-primary-dark text-primary-foreground disabled:bg-gray-700"
               >
                 {isSubmitting ? 'Verifying...' : 'Verify Badge'}
               </Button>
@@ -163,7 +194,7 @@ export default function VerificationDialog({ open, onOpenChange }: VerificationD
                   'Your badge has been verified successfully!'
                 )}
               </p>
-              <Button onClick={handleClose} className="mt-4 bg-purple-600 hover:bg-purple-700">
+              <Button onClick={handleClose} className="mt-4 bg-primary hover:bg-primary-dark text-primary-foreground">
                 Close
               </Button>
             </div>
