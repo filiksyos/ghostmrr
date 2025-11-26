@@ -36,7 +36,6 @@ export default function Home() {
     return allBadges
       .filter(badge => badge.revealExact && badge.metrics.mrr)
       .sort((a, b) => b.metrics.mrr - a.metrics.mrr)
-      .slice(0, 3)
       .map((badge, index) => ({
         rank: index + 1,
         did: badge.did,
@@ -49,7 +48,6 @@ export default function Home() {
   const getTenMRRClubMembers = () => {
     return allBadges
       .filter(badge => badge.metrics.mrr >= 10)
-      .slice(0, 3)
       .map((badge, index) => ({
         rank: index + 1,
         did: badge.did,
@@ -59,8 +57,8 @@ export default function Home() {
       }));
   };
 
-  const exactNumbersCount = allBadges.filter(b => b.revealExact && b.metrics.mrr).length;
-  const tenMRRCount = allBadges.filter(b => b.metrics.mrr >= 10).length;
+  const exactNumbersMembers = getExactNumbersMembers();
+  const tenMRRMembers = getTenMRRClubMembers();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -95,8 +93,8 @@ export default function Home() {
                 icon=""
                 title="Exact Numbers Leaderboard"
                 description="Show your precise MRR and compete for the #1 spot"
-                memberCount={Math.max(exactNumbersCount, 47)}
-                members={getExactNumbersMembers()}
+                memberCount={exactNumbersMembers.length}
+                members={exactNumbersMembers}
                 slug="exact-numbers"
                 showExact={true}
                 onVerifyClick={() => setShowVerificationDialog(true)}
@@ -106,8 +104,8 @@ export default function Home() {
                 icon=""
                 title=">$10 MRR Club"
                 description="Join verified founders earning $10+ monthly recurring revenue"
-                memberCount={Math.max(tenMRRCount, 153)}
-                members={getTenMRRClubMembers()}
+                memberCount={tenMRRMembers.length}
+                members={tenMRRMembers}
                 slug="10-mrr-club"
                 showExact={false}
                 onVerifyClick={() => setShowVerificationDialog(true)}
