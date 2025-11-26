@@ -6,7 +6,7 @@ export default function HowItWorks() {
       number: 1,
       icon: '💻',
       title: 'Run CLI',
-      description: 'npx @ghostmrr/cli verify',
+      description: 'npx ghostmrr@latest verify',
       details: 'Generate signed proof locally',
     },
     {

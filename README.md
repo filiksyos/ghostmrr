@@ -10,7 +10,7 @@ GhostMRR lets indie founders prove their MRR (Monthly Recurring Revenue) without
 - ✅ **Cryptographically signed**: Ed25519 DID signatures
 - ✅ **Privacy-preserving**: Only share MRR tier ($1k+, $10k+, etc)
 - ✅ **No backend**: All verification happens client-side
-- ✅ **Instant**: `npx ghostmrr verify` → get verified badge
+- ✅ **Instant**: `npx ghostmrr@latest verify` → get verified badge
 
 ---
 
@@ -20,7 +20,7 @@ GhostMRR lets indie founders prove their MRR (Monthly Recurring Revenue) without
 
 ```bash
 # Run CLI (no install needed)
-npx @ghostmrr/cli verify
+npx ghostmrr@latest verify
 
 # Follow prompts:
 # 1. Click the pre-filled link to create a restricted API key (one-click setup)

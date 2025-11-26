@@ -70,13 +70,9 @@ export default function Home() {
       <section className="py-8 px-4">
         <div className="max-w-7xl mx-auto text-center space-y-4">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
-            <span className="inline-block">Verify your revenue.</span>{' '}
-            <span className="inline-block text-primary">Reveal nothing.</span>
+            <span className="block">Join verified startup groups.</span>
+            <span className="block text-primary">without revealing your data</span>
           </h1>
-          
-          <p className="max-w-2xl mx-auto text-sm text-muted-foreground">
-            Zero-trust. DID-powered. Privacy-first verification for indie hackers.
-          </p>
 
           <div className="pt-2">
             <Button onClick={() => setShowVerificationDialog(true)} className="bg-primary hover:bg-primary-dark text-primary-foreground">
@@ -118,34 +114,6 @@ export default function Home() {
               />
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-12 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="p-6 bg-card border-border">
-              <h3 className="text-base font-semibold mb-2">Local-First</h3>
-              <p className="text-muted-foreground text-xs">
-                Your Stripe key never leaves your machine
-              </p>
-            </Card>
-
-            <Card className="p-6 bg-card border-border">
-              <h3 className="text-base font-semibold mb-2">Crypto-Signed</h3>
-              <p className="text-muted-foreground text-xs">
-                Ed25519 sigs ensure authenticity
-              </p>
-            </Card>
-
-            <Card className="p-6 bg-card border-border">
-              <h3 className="text-base font-semibold mb-2">Privacy-Preserving</h3>
-              <p className="text-muted-foreground text-xs">
-                Only share your tier
-              </p>
-            </Card>
-          </div>
         </div>
       </section>
 
