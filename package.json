@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@noble/ed25519": "^2.3.0",
+    "@supabase/supabase-js": "^2.84.0",
     "next": "16.0.3",
     "react": "19.2.0",
     "react-dom": "19.2.0"

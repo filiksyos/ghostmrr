@@ -11,40 +11,46 @@ export default function VerifyPage() {
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isUpdate, setIsUpdate] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleVerify = async () => {
     setError(null);
     setIsValid(null);
     setBadge(null);
+    setIsUpdate(false);
 
     try {
       const parsedBadge: VerificationBadge = JSON.parse(input);
+      
+      // Client-side verification (instant feedback)
       const valid = await verifyBadge(parsedBadge);
-
       setBadge(parsedBadge);
       setIsValid(valid);
 
       if (valid) {
-        // Store in localStorage for leaderboard (prevent duplicates)
-        const stored = localStorage.getItem('verifiedBadges') || '[]';
-        const badges: VerificationBadge[] = JSON.parse(stored);
-        
-        // Check if this DID already exists
-        const existingIndex = badges.findIndex(b => b.did === parsedBadge.did);
-        
-        if (existingIndex >= 0) {
-          // Update existing badge (in case MRR changed)
-          badges[existingIndex] = parsedBadge;
-          setIsUpdate(true);
-        } else {
-          // Add new badge
-          badges.push(parsedBadge);
-          setIsUpdate(false);
+        // Submit to API for server-side verification and storage
+        setIsSubmitting(true);
+        try {
+          const response = await fetch('/api/badges', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(parsedBadge),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to submit badge');
+          }
+
+          setIsUpdate(data.isUpdate || false);
+        } catch (apiError: any) {
+          setError(`Failed to submit badge: ${apiError.message}`);
+        } finally {
+          setIsSubmitting(false);
         }
-        
-        localStorage.setItem('verifiedBadges', JSON.stringify(badges));
-      } else {
-        setIsUpdate(false);
       }
     } catch (err: any) {
       setError(err.message || 'Invalid JSON format');
@@ -71,9 +77,10 @@ export default function VerifyPage() {
 
           <button
             onClick={handleVerify}
-            className="w-full py-4 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors"
+            disabled={isSubmitting}
+            className="w-full py-4 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
           >
-            Verify Badge
+            {isSubmitting ? 'Submitting...' : 'Verify Badge'}
           </button>
 
           {error && (
@@ -88,14 +95,19 @@ export default function VerifyPage() {
             </div>
           )}
 
-          {isValid === true && badge && (
+          {isValid === true && badge && !isSubmitting && (
             <div className="space-y-4">
               <div className="p-4 bg-green-900/50 border border-green-600 rounded-lg">
                 <p className="text-green-400">
                   ✅ Signature verified! Badge is authentic.
                   {isUpdate && (
                     <span className="block mt-2 text-sm text-green-300">
-                      ℹ️ Updated existing badge for this DID.
+                      ℹ️ Updated existing badge for this DID in the leaderboard.
+                    </span>
+                  )}
+                  {!isUpdate && !error && (
+                    <span className="block mt-2 text-sm text-green-300">
+                      ✅ Badge submitted to leaderboard successfully!
                     </span>
                   )}
                 </p>
