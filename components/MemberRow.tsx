@@ -19,9 +19,6 @@ export default function MemberRow({
   showExact = false,
 }: MemberRowProps) {
   const getMedal = (rank: number) => {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
     return null;
   };
 
@@ -53,16 +50,16 @@ export default function MemberRow({
   const name = displayName || `Anonymous #${did.slice(-3)}`;
 
   return (
-    <div className="flex items-center justify-between py-3 px-4 hover:bg-gray-800/50 rounded-lg transition-colors">
+    <div className="flex items-center justify-between py-3 px-4 hover:bg-accent/50 rounded-lg transition-colors">
       <div className="flex items-center space-x-4 flex-1">
-        <div className="w-8 text-center font-mono text-sm text-gray-400">
+        <div className="w-8 text-center font-mono text-sm text-muted-foreground">
           #{rank}
         </div>
         {getMedal(rank) && (
           <span className="text-xl">{getMedal(rank)}</span>
         )}
         <Avatar className="h-8 w-8">
-          <AvatarFallback className="bg-purple-600 text-xs">
+          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
             {getInitials(name)}
           </AvatarFallback>
         </Avatar>
@@ -70,9 +67,9 @@ export default function MemberRow({
       </div>
       
       <div className="flex items-center space-x-4">
-        <span className="font-mono text-sm text-purple-400">{formatMRR()}</span>
-        <Badge variant="outline" className="text-green-500 border-green-500">
-          ✅ {formatTime(verifiedAt)}
+        <span className="font-mono text-sm text-primary">{formatMRR()}</span>
+        <Badge variant="outline" className="text-primary border-primary/50 bg-primary/5">
+          {formatTime(verifiedAt)}
         </Badge>
       </div>
     </div>

@@ -38,20 +38,23 @@ export default function GroupCard({
   const remainingCount = memberCount - members.length;
 
   return (
-    <Card className="bg-gray-900 border-gray-800 hover:border-gray-700 transition-all duration-200 hover:translate-y-[-4px]">
-      <CardHeader>
+    <Card className="bg-card border-border hover:border-primary/50 transition-all duration-200 hover:shadow-hover">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center space-x-2 text-2xl">
-            <span>{icon}</span>
+          <CardTitle className="flex items-center space-x-2 text-lg">
+            {icon && <span>{icon}</span>}
             <span>{title}</span>
           </CardTitle>
-          <span className="text-sm text-gray-400">Members: {memberCount}</span>
+          <Button onClick={onVerifyClick} size="sm" className="bg-primary hover:bg-primary-dark text-primary-foreground">
+            Join
+          </Button>
         </div>
-        <Separator className="my-2 bg-gray-800" />
-        <CardDescription className="text-gray-300">{description}</CardDescription>
+        <CardDescription className="text-xs text-muted-foreground pt-1">{description}</CardDescription>
       </CardHeader>
       
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-3 pt-0">
+        <Separator className="bg-border" />
+        
         <div className="space-y-1">
           {members.map((member) => (
             <MemberRow
@@ -66,15 +69,12 @@ export default function GroupCard({
           ))}
         </div>
         
-        <div className="flex gap-3 pt-4">
-          <Link href={`/groups/${slug}`} className="flex-1">
-            <Button variant="outline" className="w-full border-gray-700 hover:bg-gray-800">
-              👀 Show More ({remainingCount} startups)
+        <div className="flex justify-center pt-2">
+          <Link href={`/groups/${slug}`}>
+            <Button variant="outline" className="text-sm border-border hover:bg-accent hover:text-accent-foreground">
+              Show More ({remainingCount})
             </Button>
           </Link>
-          <Button onClick={onVerifyClick} className="flex-1 bg-purple-600 hover:bg-purple-700">
-            🔒 Verify to Join
-          </Button>
         </div>
       </CardContent>
     </Card>

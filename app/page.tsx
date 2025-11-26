@@ -6,6 +6,7 @@ import GroupCard from '@/components/GroupCard';
 import HowItWorks from '@/components/HowItWorks';
 import VerificationDialog from '@/components/VerificationDialog';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { VerificationBadge } from '@/lib/types/verification';
 
 export default function Home() {
@@ -62,75 +63,38 @@ export default function Home() {
   const tenMRRCount = allBadges.filter(b => b.metrics.mrr >= 10).length;
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <Navigation onVerifyClick={() => setShowVerificationDialog(true)} />
+    <div className="min-h-screen bg-background text-foreground">
+      <Navigation />
 
       {/* Hero Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h1 className="text-6xl font-bold tracking-tight">
-            👻 <span className="bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">GhostMRR</span>
+      <section className="py-8 px-4">
+        <div className="max-w-7xl mx-auto text-center space-y-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
+            <span className="inline-block">Verify your revenue.</span>{' '}
+            <span className="inline-block text-primary">Reveal nothing.</span>
           </h1>
           
-          <p className="text-3xl font-semibold text-gray-200">
-            "Verify your revenue. Reveal nothing."
-          </p>
-          
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Zero-trust. DID-powered. Privacy-first verification.
+          <p className="max-w-2xl mx-auto text-sm text-muted-foreground">
+            Zero-trust. DID-powered. Privacy-first verification for indie hackers.
           </p>
 
-          <button
-            onClick={() => setShowVerificationDialog(true)}
-            className="px-8 py-4 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold text-lg transition-colors"
-          >
-            🔐 Verify Your Badge
-          </button>
-
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="p-6 bg-gray-900 border-gray-800">
-              <div className="text-4xl mb-4">🔒</div>
-              <h3 className="text-lg font-semibold mb-2">Local-First</h3>
-              <p className="text-gray-400 text-sm">
-                Your Stripe key never leaves your machine
-              </p>
-            </Card>
-
-            <Card className="p-6 bg-gray-900 border-gray-800">
-              <div className="text-4xl mb-4">🔐</div>
-              <h3 className="text-lg font-semibold mb-2">Crypto-Signed</h3>
-              <p className="text-gray-400 text-sm">
-                Ed25519 sigs ensure authenticity
-              </p>
-            </Card>
-
-            <Card className="p-6 bg-gray-900 border-gray-800">
-              <div className="text-4xl mb-4">🎭</div>
-              <h3 className="text-lg font-semibold mb-2">Privacy-Preserving</h3>
-              <p className="text-gray-400 text-sm">
-                Only share your tier
-              </p>
-            </Card>
+          <div className="pt-2">
+            <Button onClick={() => setShowVerificationDialog(true)} className="bg-primary hover:bg-primary-dark text-primary-foreground">
+              Verify Startup
+            </Button>
           </div>
         </div>
       </section>
 
       {/* Groups Section */}
-      <section id="groups" className="py-20 px-4 bg-gray-950">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">
-            Join Verified Founder Communities
-          </h2>
-          <p className="text-gray-400 text-center mb-12">
-            Prove your revenue and connect with other verified founders
-          </p>
-
+      <section id="groups" className="py-8 px-4">
+        <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="text-center py-12">
               <div className="animate-pulse text-gray-500">Loading groups...</div>
             </div>
           ) : (
-            <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <GroupCard
                 icon="📊"
                 title="Exact Numbers Leaderboard"
@@ -157,11 +121,39 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Features Section */}
+      <section className="py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="p-6 bg-card border-border">
+              <h3 className="text-base font-semibold mb-2">Local-First</h3>
+              <p className="text-muted-foreground text-xs">
+                Your Stripe key never leaves your machine
+              </p>
+            </Card>
+
+            <Card className="p-6 bg-card border-border">
+              <h3 className="text-base font-semibold mb-2">Crypto-Signed</h3>
+              <p className="text-muted-foreground text-xs">
+                Ed25519 sigs ensure authenticity
+              </p>
+            </Card>
+
+            <Card className="p-6 bg-card border-border">
+              <h3 className="text-base font-semibold mb-2">Privacy-Preserving</h3>
+              <p className="text-muted-foreground text-xs">
+                Only share your tier
+              </p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works Section */}
       <HowItWorks />
 
       {/* Footer */}
-      <footer className="py-12 px-4 bg-black border-t border-gray-800">
+      <footer className="py-8 px-4 bg-background border-t border-border">
         <div className="max-w-6xl mx-auto text-center space-y-4">
           <div className="text-2xl">👻 GhostMRR</div>
           <div className="flex justify-center space-x-6 text-sm text-gray-400">

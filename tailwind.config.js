@@ -24,6 +24,8 @@ module.exports = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          light: "hsl(var(--primary-light))",
+          dark: "hsl(var(--primary-dark))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -40,6 +42,8 @@ module.exports = {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          light: "hsl(var(--accent-light))",
+          dark: "hsl(var(--accent-dark))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -49,11 +53,29 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        neutral: {
+          DEFAULT: "hsl(var(--neutral))",
+          dark: "hsl(var(--neutral-dark))",
+          darker: "hsl(var(--neutral-darker))",
+        },
+        text: {
+          DEFAULT: "hsl(var(--text))",
+          light: "hsl(var(--text-light))",
+          dark: "hsl(var(--text-dark))",
+        },
+        surface: {
+          light: "hsl(var(--surface-light))",
+          dark: "hsl(var(--surface-dark))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        'subtle': '0 1px 3px rgba(0,0,0,0.05)',
+        'hover': '0 4px 6px -1px rgba(167, 139, 250, 0.1), 0 2px 4px -1px rgba(167, 139, 250, 0.06)',
       },
       keyframes: {
         "accordion-down": {
