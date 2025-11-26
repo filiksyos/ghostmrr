@@ -51,6 +51,9 @@ export async function verifyCommand() {
     fs.writeFileSync(outputPath, JSON.stringify(verification, null, 2));
 
     console.log('\n✅ Success! Verification badge generated.');
+    console.log(`\n🔑 Your DID: ${verification.did}`);
+    console.log(`   ℹ️  This DID will be reused for all future verifications.`);
+    console.log(`   💡 Run 'ghostmrr did show' to see your persistent DID.`);
     console.log(`\n📄 Saved to: ${outputPath}`);
     console.log('\n🌐 Next steps:');
     console.log('   1. Go to https://ghostmrr.app/verify');

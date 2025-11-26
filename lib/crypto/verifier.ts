@@ -13,6 +13,18 @@ function base64ToUint8Array(base64: string): Uint8Array {
 
 export async function verifyBadge(badge: VerificationBadge): Promise<boolean> {
   try {
+    // Validate required fields exist
+    if (!badge.did || !badge.publicKey || !badge.signature || !badge.metrics || !badge.timestamp) {
+      return false;
+    }
+
+    // Validate DID format matches public key
+    // DID format: did:key:z{first-32-chars-of-base64-publicKey}
+    const expectedDidPrefix = `did:key:z${badge.publicKey.slice(0, 32)}`;
+    if (badge.did !== expectedDidPrefix) {
+      return false;
+    }
+
     // Reconstruct message
     const message = JSON.stringify({
       metrics: badge.metrics,

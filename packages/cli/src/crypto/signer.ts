@@ -1,12 +1,12 @@
 import * as ed from '@noble/ed25519';
 import { MRRMetrics, VerificationBadge } from '../types/verification.js';
+import { loadOrCreateKeypair } from './keypair.js';
 
 export async function generateSignedVerification(
   metrics: MRRMetrics
 ): Promise<VerificationBadge> {
-  // Generate ephemeral Ed25519 keypair
-  const privateKey = ed.utils.randomPrivateKey();
-  const publicKey = await ed.getPublicKeyAsync(privateKey);
+  // Load or create persistent Ed25519 keypair
+  const { privateKey, publicKey, did } = await loadOrCreateKeypair();
 
   // Create message to sign
   const timestamp = new Date().toISOString();
@@ -22,9 +22,6 @@ export async function generateSignedVerification(
   // Convert to base64 for JSON
   const publicKeyBase64 = Buffer.from(publicKey).toString('base64');
   const signatureBase64 = Buffer.from(signature).toString('base64');
-
-  // Generate DID (did:key format)
-  const did = `did:key:z${publicKeyBase64.slice(0, 32)}`;
 
   return {
     did,

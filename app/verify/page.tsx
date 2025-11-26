@@ -10,6 +10,7 @@ export default function VerifyPage() {
   const [badge, setBadge] = useState<VerificationBadge | null>(null);
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isUpdate, setIsUpdate] = useState(false);
 
   const handleVerify = async () => {
     setError(null);
@@ -24,11 +25,26 @@ export default function VerifyPage() {
       setIsValid(valid);
 
       if (valid) {
-        // Store in localStorage for leaderboard
+        // Store in localStorage for leaderboard (prevent duplicates)
         const stored = localStorage.getItem('verifiedBadges') || '[]';
-        const badges = JSON.parse(stored);
-        badges.push(parsedBadge);
+        const badges: VerificationBadge[] = JSON.parse(stored);
+        
+        // Check if this DID already exists
+        const existingIndex = badges.findIndex(b => b.did === parsedBadge.did);
+        
+        if (existingIndex >= 0) {
+          // Update existing badge (in case MRR changed)
+          badges[existingIndex] = parsedBadge;
+          setIsUpdate(true);
+        } else {
+          // Add new badge
+          badges.push(parsedBadge);
+          setIsUpdate(false);
+        }
+        
         localStorage.setItem('verifiedBadges', JSON.stringify(badges));
+      } else {
+        setIsUpdate(false);
       }
     } catch (err: any) {
       setError(err.message || 'Invalid JSON format');
@@ -75,7 +91,14 @@ export default function VerifyPage() {
           {isValid === true && badge && (
             <div className="space-y-4">
               <div className="p-4 bg-green-900/50 border border-green-600 rounded-lg">
-                <p className="text-green-400">✅ Signature verified! Badge is authentic.</p>
+                <p className="text-green-400">
+                  ✅ Signature verified! Badge is authentic.
+                  {isUpdate && (
+                    <span className="block mt-2 text-sm text-green-300">
+                      ℹ️ Updated existing badge for this DID.
+                    </span>
+                  )}
+                </p>
               </div>
               <VerificationBadgeComponent badge={badge} />
             </div>

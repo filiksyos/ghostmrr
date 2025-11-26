@@ -3,6 +3,7 @@
 import { Command } from 'commander';
 import { verifyCommand } from '../commands/verify.js';
 import { checkCommand } from '../commands/check.js';
+import { didShowCommand, didResetCommand } from '../commands/did.js';
 
 const program = new Command();
 
@@ -20,5 +21,19 @@ program
   .command('check <file>')
   .description('Verify a verification.json file locally')
   .action(checkCommand);
+
+const didCommand = program
+  .command('did')
+  .description('Manage your persistent DID (Decentralized Identifier)');
+
+didCommand
+  .command('show')
+  .description('Display your current DID and public key')
+  .action(didShowCommand);
+
+didCommand
+  .command('reset')
+  .description('Reset your DID (generates a new keypair)')
+  .action(didResetCommand);
 
 program.parse();
