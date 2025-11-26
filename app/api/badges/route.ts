@@ -33,6 +33,8 @@ export async function GET() {
       publicKey: row.public_key,
       signature: row.signature,
       timestamp: row.timestamp,
+      displayName: row.display_name,
+      revealExact: row.reveal_exact,
     }));
 
     return NextResponse.json({ badges });
@@ -78,6 +80,8 @@ export async function POST(request: NextRequest) {
       public_key: badge.publicKey,
       signature: badge.signature,
       timestamp: badge.timestamp,
+      display_name: badge.displayName || null,
+      reveal_exact: badge.revealExact || false,
     };
 
     let result;

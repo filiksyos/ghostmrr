@@ -9,10 +9,10 @@ import { VerificationBadge } from '@/lib/types/verification';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { did: string } }
+  { params }: { params: Promise<{ did: string }> }
 ) {
   try {
-    const { did } = params;
+    const { did } = await params;
 
     const { data, error } = await supabase
       .from('badges')
@@ -46,6 +46,8 @@ export async function GET(
       publicKey: data.public_key,
       signature: data.signature,
       timestamp: data.timestamp,
+      displayName: data.display_name,
+      revealExact: data.reveal_exact,
     };
 
     return NextResponse.json({ badge });
@@ -64,10 +66,10 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { did: string } }
+  { params }: { params: Promise<{ did: string }> }
 ) {
   try {
-    const { did } = params;
+    const { did } = await params;
     const badge: VerificationBadge = await request.json();
 
     // Verify DID matches
@@ -96,6 +98,8 @@ export async function PUT(
       public_key: badge.publicKey,
       signature: badge.signature,
       timestamp: badge.timestamp,
+      display_name: badge.displayName || null,
+      reveal_exact: badge.revealExact || false,
     };
 
     const { data, error } = await supabase
