@@ -29,6 +29,8 @@ export default function VerificationDialog({ open, onOpenChange, targetGroup, on
   const [success, setSuccess] = useState(false);
   const [joinedGroups, setJoinedGroups] = useState<string[]>([]);
   const [verifiedBadge, setVerifiedBadge] = useState<VerificationBadge | null>(null);
+  const [website, setWebsite] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   const handleVerify = async () => {
     setError(null);
@@ -56,15 +58,42 @@ export default function VerificationDialog({ open, onOpenChange, targetGroup, on
     }
   };
 
-  const handleIdentityChoice = async (identityMode: 'anonymous' | 'public') => {
+  // Normalize URL to ensure it has a protocol
+  const normalizeUrl = (url: string): string => {
+    const trimmed = url.trim();
+    if (!trimmed) return '';
+    
+    // Check if URL already has a protocol
+    if (trimmed.match(/^https?:\/\//i)) {
+      return trimmed;
+    }
+    
+    // Add https:// by default
+    return `https://${trimmed}`;
+  };
+
+  const handleIdentityChoice = async () => {
     if (!verifiedBadge) return;
+    
+    // Validate input if not anonymous
+    if (!isAnonymous && !website.trim()) {
+      setError('Please enter a website or select anonymous');
+      return;
+    }
     
     setIsSubmitting(true);
     setError(null);
 
     try {
+      const identityMode = isAnonymous ? 'anonymous' : 'public';
+      
       // Set the joined group based on which button was clicked
       verifiedBadge.joinedGroup = targetGroup || undefined;
+      
+      // If public mode, set the display name from website input (normalized)
+      if (identityMode === 'public' && website.trim()) {
+        verifiedBadge.displayName = normalizeUrl(website);
+      }
 
       // Submit to backend
       const response = await fetch('/api/badges', {
@@ -87,7 +116,7 @@ export default function VerificationDialog({ open, onOpenChange, targetGroup, on
         timestamp: verifiedBadge.timestamp,
         verifiedAt: new Date().toISOString(),
         identityMode,
-        displayName: identityMode === 'public' ? verifiedBadge.displayName : undefined,
+        displayName: identityMode === 'public' ? normalizeUrl(website) : undefined,
         joinedGroups: targetGroup ? [targetGroup] : [],
       };
 
@@ -105,6 +134,8 @@ export default function VerificationDialog({ open, onOpenChange, targetGroup, on
       setJoinedGroups(groups);
       setSuccess(true);
       setInput('');
+      setWebsite('');
+      setIsAnonymous(false);
       
       // Notify parent component
       if (onVerificationComplete) {
@@ -137,6 +168,8 @@ export default function VerificationDialog({ open, onOpenChange, targetGroup, on
     setShowInstructions(true);
     setShowIdentityChoice(false);
     setVerifiedBadge(null);
+    setWebsite('');
+    setIsAnonymous(false);
     onOpenChange(false);
   };
 
@@ -179,43 +212,34 @@ export default function VerificationDialog({ open, onOpenChange, targetGroup, on
           {showIdentityChoice && !success ? (
             <>
               <div className="space-y-4">
-                <div className="bg-black/50 border border-gray-800 rounded-lg p-6 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="text-2xl">🔒</div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold mb-1">Anonymous (Recommended)</h3>
-                      <p className="text-sm text-gray-400">
-                        Show only your MRR and DID. No company name or website visible.
-                      </p>
-                    </div>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="website" className="block text-sm font-medium text-gray-300 mb-2">
+                      Website <span className="text-gray-500">(clickable on leaderboards)</span>
+                    </label>
+                    <input
+                      id="website"
+                      type="text"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      disabled={isAnonymous}
+                      placeholder="example.com or https://example.com"
+                      className="w-full px-4 py-3 bg-black border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
                   </div>
-                  <Button
-                    onClick={() => handleIdentityChoice('anonymous')}
-                    disabled={isSubmitting}
-                    className="w-full bg-primary hover:bg-primary-dark text-primary-foreground"
-                  >
-                    Continue as Anonymous
-                  </Button>
-                </div>
 
-                <div className="bg-black/50 border border-gray-800 rounded-lg p-6 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="text-2xl">🌐</div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold mb-1">Public</h3>
-                      <p className="text-sm text-gray-400">
-                        Show your company website/name alongside your metrics.
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-3 p-4 bg-black/50 border border-gray-800 rounded-lg">
+                    <input
+                      id="anonymous"
+                      type="checkbox"
+                      checked={isAnonymous}
+                      onChange={(e) => setIsAnonymous(e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-700 bg-gray-800 text-purple-600 focus:ring-2 focus:ring-purple-600 focus:ring-offset-0 cursor-pointer"
+                    />
+                    <label htmlFor="anonymous" className="flex-1 text-sm text-gray-300 cursor-pointer">
+                      Verify as anonymous
+                    </label>
                   </div>
-                  <Button
-                    onClick={() => handleIdentityChoice('public')}
-                    disabled={isSubmitting}
-                    variant="outline"
-                    className="w-full border-gray-700 hover:bg-gray-800"
-                  >
-                    Continue as Public
-                  </Button>
                 </div>
 
                 {error && (
@@ -224,11 +248,21 @@ export default function VerificationDialog({ open, onOpenChange, targetGroup, on
                   </div>
                 )}
 
+                <Button
+                  onClick={handleIdentityChoice}
+                  disabled={isSubmitting || (!isAnonymous && !website.trim())}
+                  className="w-full bg-primary hover:bg-primary-dark text-primary-foreground disabled:bg-gray-700"
+                >
+                  {isSubmitting ? 'Submitting...' : 'Continue'}
+                </Button>
+
                 <div className="text-center">
                   <button
                     onClick={() => {
                       setShowIdentityChoice(false);
                       setVerifiedBadge(null);
+                      setWebsite('');
+                      setIsAnonymous(false);
                     }}
                     className="text-sm text-gray-400 hover:text-gray-300"
                   >

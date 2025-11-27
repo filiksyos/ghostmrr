@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { ExternalLink } from 'lucide-react';
 
 interface MemberRowProps {
   rank: number;
@@ -48,6 +49,23 @@ export default function MemberRow({
   };
 
   const name = displayName || `Anonymous #${did.slice(-3)}`;
+  
+  // Check if displayName is a URL
+  const isUrl = displayName && displayName.match(/^https?:\/\//i);
+  
+  // Extract domain from URL for display
+  const getDisplayName = () => {
+    if (!displayName) return name;
+    if (isUrl) {
+      try {
+        const url = new URL(displayName);
+        return url.hostname.replace(/^www\./, '');
+      } catch {
+        return displayName;
+      }
+    }
+    return displayName;
+  };
 
   return (
     <div className="flex items-center justify-between py-3 px-4 hover:bg-accent/50 rounded-lg transition-colors">
@@ -63,7 +81,19 @@ export default function MemberRow({
             {getInitials(name)}
           </AvatarFallback>
         </Avatar>
-        <span className="font-medium">{name}</span>
+        {isUrl ? (
+          <a
+            href={displayName}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium hover:text-primary transition-colors flex items-center gap-1.5 group"
+          >
+            {getDisplayName()}
+            <ExternalLink className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
+          </a>
+        ) : (
+          <span className="font-medium">{name}</span>
+        )}
       </div>
       
       <div className="flex items-center space-x-4">
