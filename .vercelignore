@@ -1,0 +1,10 @@
+# Ignore CLI package during Vercel build
+packages/cli
+
+# Ignore shared package source (use compiled version if needed)
+packages/shared/src
+
+# Build artifacts
+packages/*/dist
+packages/*/node_modules
+
