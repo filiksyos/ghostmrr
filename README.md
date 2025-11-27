@@ -10,7 +10,7 @@ GhostMRR lets indie founders prove their MRR (Monthly Recurring Revenue) without
 - ✅ **Cryptographically signed**: Ed25519 DID signatures
 - ✅ **Privacy-preserving**: Only share MRR tier ($1k+, $10k+, etc)
 - ✅ **No backend**: All verification happens client-side
-- ✅ **Instant**: `npx ghostmrr verify` → get verified badge
+- ✅ **Instant**: `npx ghostmrr@latest verify` → get verified badge
 
 ---
 
@@ -20,12 +20,13 @@ GhostMRR lets indie founders prove their MRR (Monthly Recurring Revenue) without
 
 ```bash
 # Run CLI (no install needed)
-npx @ghostmrr/cli verify
+npx ghostmrr@latest verify
 
 # Follow prompts:
-# 1. Paste your Stripe secret key (local only)
-# 2. CLI queries Stripe → calculates MRR
-# 3. Generates signed verification.json
+# 1. Click the pre-filled link to create a restricted API key (one-click setup)
+# 2. Paste your restricted key (rk_live_... or rk_test_...)
+# 3. CLI queries Stripe → calculates MRR
+# 4. Generates signed verification.json
 ```
 
 **Output: `verification.json`**
@@ -69,6 +70,18 @@ ghosmrr/
 3. **Generates ephemeral Ed25519 keypair** (DID format)
 4. **Signs metrics + timestamp**
 5. **Frontend verifies signature** using public key (no backend)
+
+### Security: Restricted API Keys Only
+
+**GhostMRR only accepts restricted API keys** (`rk_live_...` or `rk_test_...`) for security. Restricted keys are read-only and safer:
+
+- ✅ **Read-only**: Can only read subscription data, not modify anything
+- ✅ **Minimal permissions**: Only needs `Subscriptions: Read` permission
+- ✅ **One-click setup**: The CLI provides a pre-filled link that auto-configures everything
+
+The CLI will show you a direct link to create a restricted key with the correct permissions. Just click, create, and paste!
+
+**Why restricted keys?** Even if the key is exposed, it can only read data, not perform operations or access sensitive information.
 
 ---
 

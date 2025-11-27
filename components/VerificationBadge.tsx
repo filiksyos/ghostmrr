@@ -22,7 +22,6 @@ export default function VerificationBadge({ badge }: Props) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold">{badge.metrics.tier}</span>
-                <span className="text-green-400 text-xl">✓</span>
               </div>
               <div className="text-sm text-gray-400">Verified MRR</div>
             </div>

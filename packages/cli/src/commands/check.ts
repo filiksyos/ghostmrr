@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import { verifySignature } from '../crypto/signer';
-import { VerificationBadge } from '../types/verification';
+import { verifySignature } from '../crypto/signer.js';
+import { VerificationBadge } from '../types/verification.js';
 
 export async function checkCommand(file: string) {
   console.log('\n👻 GhostMRR - Verify Badge\n');

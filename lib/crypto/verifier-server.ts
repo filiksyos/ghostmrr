@@ -1,17 +1,11 @@
 import * as ed from '@noble/ed25519';
 import { VerificationBadge } from '../types/verification';
 
-// Browser-compatible base64 decode
-function base64ToUint8Array(base64: string): Uint8Array {
-  const binaryString = atob(base64);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes;
-}
-
-export async function verifyBadge(badge: VerificationBadge): Promise<boolean> {
+/**
+ * Server-side badge verifier (Node.js compatible)
+ * Uses Buffer instead of browser APIs
+ */
+export async function verifyBadgeServer(badge: VerificationBadge): Promise<boolean> {
   try {
     // Validate required fields exist
     if (!badge.did || !badge.publicKey || !badge.signature || !badge.metrics || !badge.timestamp) {
@@ -31,15 +25,16 @@ export async function verifyBadge(badge: VerificationBadge): Promise<boolean> {
       timestamp: badge.timestamp,
     });
 
-    // Convert from base64 (browser-compatible)
-    const publicKey = base64ToUint8Array(badge.publicKey);
-    const signature = base64ToUint8Array(badge.signature);
-    const messageBytes = new TextEncoder().encode(message);
+    // Convert from base64 (Node.js Buffer)
+    const publicKey = Buffer.from(badge.publicKey, 'base64');
+    const signature = Buffer.from(badge.signature, 'base64');
+    const messageBytes = Buffer.from(message, 'utf-8');
 
     // Verify signature
     return await ed.verifyAsync(signature, messageBytes, publicKey);
   } catch (error) {
-    console.error('Verification error:', error);
+    console.error('Server verification error:', error);
     return false;
   }
 }
+
