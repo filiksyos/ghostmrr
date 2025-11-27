@@ -9,21 +9,26 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { VerificationBadge } from '@/lib/types/verification';
+import { VerificationBadge, VerifiedProfile } from '@/lib/types/verification';
 import { verifyBadge } from '@/lib/crypto/verifier';
+import { saveVerifiedProfile, addGroupToProfile } from '@/lib/localStorage/verifiedProfile';
 
 interface VerificationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  targetGroup?: 'exact-numbers' | '10-mrr-club' | null;
+  onVerificationComplete?: () => void;
 }
 
-export default function VerificationDialog({ open, onOpenChange }: VerificationDialogProps) {
+export default function VerificationDialog({ open, onOpenChange, targetGroup, onVerificationComplete }: VerificationDialogProps) {
   const [showInstructions, setShowInstructions] = useState(true);
+  const [showIdentityChoice, setShowIdentityChoice] = useState(false);
   const [input, setInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [joinedGroups, setJoinedGroups] = useState<string[]>([]);
+  const [verifiedBadge, setVerifiedBadge] = useState<VerificationBadge | null>(null);
 
   const handleVerify = async () => {
     setError(null);
@@ -41,11 +46,31 @@ export default function VerificationDialog({ open, onOpenChange }: VerificationD
         return;
       }
 
+      // Store badge and show identity choice
+      setVerifiedBadge(badge);
+      setShowIdentityChoice(true);
+      setIsSubmitting(false);
+    } catch (err: any) {
+      setError(err.message || 'Failed to verify badge');
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleIdentityChoice = async (identityMode: 'anonymous' | 'public') => {
+    if (!verifiedBadge) return;
+    
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Set the joined group based on which button was clicked
+      verifiedBadge.joinedGroup = targetGroup || undefined;
+
       // Submit to backend
       const response = await fetch('/api/badges', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(badge),
+        body: JSON.stringify(verifiedBadge),
       });
 
       if (!response.ok) {
@@ -53,26 +78,40 @@ export default function VerificationDialog({ open, onOpenChange }: VerificationD
         throw new Error(data.error || 'Failed to submit badge');
       }
 
-      const data = await response.json();
-      
-      // Determine which groups user joined
+      // Create verified profile for localStorage
+      const profile: VerifiedProfile = {
+        did: verifiedBadge.did,
+        metrics: verifiedBadge.metrics,
+        publicKey: verifiedBadge.publicKey,
+        signature: verifiedBadge.signature,
+        timestamp: verifiedBadge.timestamp,
+        verifiedAt: new Date().toISOString(),
+        identityMode,
+        displayName: identityMode === 'public' ? verifiedBadge.displayName : undefined,
+        joinedGroups: targetGroup ? [targetGroup] : [],
+      };
+
+      // Save to localStorage
+      saveVerifiedProfile(profile);
+
+      // Determine which groups user joined for display
       const groups: string[] = [];
-      const mrr = badge.metrics.mrr;
-      
-      if (mrr >= 10) {
-        groups.push('>$10 MRR Club');
-      }
-      
-      // For exact numbers, check if they're revealing exact MRR
-      if (badge.revealExact) {
+      if (targetGroup === 'exact-numbers') {
         groups.push('Exact Numbers Leaderboard');
+      } else if (targetGroup === '10-mrr-club') {
+        groups.push('>$10 MRR Club');
       }
       
       setJoinedGroups(groups);
       setSuccess(true);
       setInput('');
+      
+      // Notify parent component
+      if (onVerificationComplete) {
+        onVerificationComplete();
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to verify badge');
+      setError(err.message || 'Failed to complete verification');
     } finally {
       setIsSubmitting(false);
     }
@@ -96,32 +135,109 @@ export default function VerificationDialog({ open, onOpenChange }: VerificationD
     setSuccess(false);
     setJoinedGroups([]);
     setShowInstructions(true);
+    setShowIdentityChoice(false);
+    setVerifiedBadge(null);
     onOpenChange(false);
+  };
+
+  // Get the display name for the target group
+  const getTargetGroupName = () => {
+    if (targetGroup === 'exact-numbers') return 'Exact Numbers Leaderboard';
+    if (targetGroup === '10-mrr-club') return '>$10 MRR Club';
+    return null;
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] bg-gray-900 border-gray-800">
         <DialogHeader>
-          {showInstructions && !success ? (
+          {showInstructions && !success && !showIdentityChoice ? (
             <>
               <DialogTitle className="text-2xl">Verify Your Revenue Privately</DialogTitle>
               <DialogDescription className="text-gray-400">
                 Generate a verification.json file using our CLI. No Stripe data ever leaves your device.
               </DialogDescription>
             </>
-          ) : !success ? (
+          ) : !success && !showIdentityChoice ? (
             <>
               <DialogTitle className="text-2xl">Upload Your Verification File</DialogTitle>
               <DialogDescription className="text-gray-400">
                 Paste your verification.json or upload the file:
               </DialogDescription>
             </>
+          ) : showIdentityChoice && !success ? (
+            <>
+              <DialogTitle className="text-2xl">Choose Your Identity</DialogTitle>
+              <DialogDescription className="text-gray-400">
+                How do you want to appear on leaderboards?
+              </DialogDescription>
+            </>
           ) : null}
         </DialogHeader>
 
         <div className="space-y-4 mt-4">
-          {showInstructions && !success ? (
+          {showIdentityChoice && !success ? (
+            <>
+              <div className="space-y-4">
+                <div className="bg-black/50 border border-gray-800 rounded-lg p-6 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">🔒</div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold mb-1">Anonymous (Recommended)</h3>
+                      <p className="text-sm text-gray-400">
+                        Show only your MRR and DID. No company name or website visible.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => handleIdentityChoice('anonymous')}
+                    disabled={isSubmitting}
+                    className="w-full bg-primary hover:bg-primary-dark text-primary-foreground"
+                  >
+                    Continue as Anonymous
+                  </Button>
+                </div>
+
+                <div className="bg-black/50 border border-gray-800 rounded-lg p-6 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">🌐</div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold mb-1">Public</h3>
+                      <p className="text-sm text-gray-400">
+                        Show your company website/name alongside your metrics.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => handleIdentityChoice('public')}
+                    disabled={isSubmitting}
+                    variant="outline"
+                    className="w-full border-gray-700 hover:bg-gray-800"
+                  >
+                    Continue as Public
+                  </Button>
+                </div>
+
+                {error && (
+                  <div className="p-4 bg-red-900/20 border border-red-500 rounded-lg">
+                    <p className="text-red-500 text-sm">{error}</p>
+                  </div>
+                )}
+
+                <div className="text-center">
+                  <button
+                    onClick={() => {
+                      setShowIdentityChoice(false);
+                      setVerifiedBadge(null);
+                    }}
+                    className="text-sm text-gray-400 hover:text-gray-300"
+                  >
+                    ← Back
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : showInstructions && !success ? (
             <>
               <div className="space-y-4">
                 <div className="bg-black p-4 rounded-lg">
@@ -188,7 +304,9 @@ export default function VerificationDialog({ open, onOpenChange }: VerificationD
               <div className="text-6xl">✅</div>
               <h3 className="text-2xl font-bold text-green-500">Badge Verified!</h3>
               <p className="text-gray-300">
-                {joinedGroups.length > 0 ? (
+                {getTargetGroupName() ? (
+                  <>You've joined the <strong>{getTargetGroupName()}</strong>!</>
+                ) : joinedGroups.length > 0 ? (
                   <>You've joined: <strong>{joinedGroups.join(', ')}</strong></>
                 ) : (
                   'Your badge has been verified successfully!'

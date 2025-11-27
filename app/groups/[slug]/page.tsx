@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useToast } from '@/components/ui/toast';
 import MemberRow from '@/components/MemberRow';
 import VerificationDialog from '@/components/VerificationDialog';
-import { VerificationBadge } from '@/lib/types/verification';
+import { VerificationBadge, VerifiedProfile } from '@/lib/types/verification';
+import { getVerifiedProfile, checkGroupEligibility, hasJoinedGroup, addGroupToProfile } from '@/lib/localStorage/verifiedProfile';
 import { ArrowLeft } from 'lucide-react';
 
 const GROUP_CONFIG = {
@@ -15,14 +17,14 @@ const GROUP_CONFIG = {
     title: 'Exact Numbers Leaderboard',
     description: 'Show your precise MRR and compete for the #1 spot',
     showExact: true,
-    filter: (badge: VerificationBadge) => badge.revealExact && badge.metrics.mrr > 0,
+    filter: (badge: VerificationBadge) => badge.joinedGroups?.includes('exact-numbers'),
   },
   '10-mrr-club': {
     icon: '🎯',
     title: '>$10 MRR Club',
     description: 'Join verified founders earning $10+ monthly recurring revenue',
     showExact: false,
-    filter: (badge: VerificationBadge) => badge.metrics.mrr >= 10,
+    filter: (badge: VerificationBadge) => badge.joinedGroups?.includes('10-mrr-club'),
   },
 };
 
@@ -34,12 +36,25 @@ export default function GroupPage() {
   const [badges, setBadges] = useState<VerificationBadge[]>([]);
   const [loading, setLoading] = useState(true);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const [verifiedProfile, setVerifiedProfile] = useState<VerifiedProfile | null>(null);
+  const [isJoining, setIsJoining] = useState(false);
+  const { addToast } = useToast();
 
   const config = GROUP_CONFIG[slug as keyof typeof GROUP_CONFIG];
+  const groupSlug = slug as 'exact-numbers' | '10-mrr-club';
+  const isVerified = !!verifiedProfile;
+  const alreadyJoined = hasJoinedGroup(groupSlug);
+  const eligibility = checkGroupEligibility(verifiedProfile, groupSlug);
 
   useEffect(() => {
     fetchBadges();
+    loadVerifiedProfile();
   }, []);
+
+  const loadVerifiedProfile = () => {
+    const profile = getVerifiedProfile();
+    setVerifiedProfile(profile);
+  };
 
   const fetchBadges = async () => {
     try {
@@ -60,6 +75,82 @@ export default function GroupPage() {
       console.error('Failed to fetch badges:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleJoinClick = async () => {
+    // If not verified, open verification dialog
+    if (!isVerified) {
+      setShowVerificationDialog(true);
+      return;
+    }
+
+    // If already joined, show message
+    if (alreadyJoined) {
+      addToast({
+        title: 'Already a member',
+        description: `You're already in ${config.title}`,
+        variant: 'default',
+      });
+      return;
+    }
+
+    // Check eligibility
+    if (!eligibility.eligible) {
+      addToast({
+        title: 'Not eligible',
+        description: eligibility.reason || 'You do not meet the requirements for this group',
+        variant: 'error',
+      });
+      return;
+    }
+
+    // Join group
+    setIsJoining(true);
+    try {
+      // Submit to backend
+      const badge = {
+        did: verifiedProfile.did,
+        metrics: verifiedProfile.metrics,
+        publicKey: verifiedProfile.publicKey,
+        signature: verifiedProfile.signature,
+        timestamp: verifiedProfile.timestamp,
+        displayName: verifiedProfile.displayName,
+        joinedGroup: groupSlug,
+      };
+
+      const response = await fetch('/api/badges', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(badge),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to join group');
+      }
+
+      // Update localStorage
+      addGroupToProfile(groupSlug);
+
+      // Show success
+      addToast({
+        title: 'Success!',
+        description: `You've joined ${config.title}`,
+        variant: 'success',
+      });
+
+      // Reload data
+      loadVerifiedProfile();
+      fetchBadges();
+    } catch (error: any) {
+      addToast({
+        title: 'Error',
+        description: error.message || 'Failed to join group',
+        variant: 'error',
+      });
+    } finally {
+      setIsJoining(false);
     }
   };
 
@@ -104,10 +195,11 @@ export default function GroupPage() {
             <div className="text-center py-12">
               <p className="text-gray-500">No verified members yet. Be the first!</p>
               <Button
-                onClick={() => setShowVerificationDialog(true)}
-                className="mt-4 bg-purple-600 hover:bg-purple-700"
+                onClick={handleJoinClick}
+                disabled={isJoining || alreadyJoined}
+                className={`mt-4 ${alreadyJoined ? 'bg-green-600 hover:bg-green-700' : 'bg-purple-600 hover:bg-purple-700'}`}
               >
-                🔒 Verify to Join
+                {isJoining ? '🔄 Joining...' : alreadyJoined ? '✓ Already Joined' : isVerified ? '🔓 Join Group' : '🔒 Verify to Join'}
               </Button>
             </div>
           ) : (
@@ -129,10 +221,11 @@ export default function GroupPage() {
 
         <div className="mt-8 flex justify-center">
           <Button
-            onClick={() => setShowVerificationDialog(true)}
-            className="bg-purple-600 hover:bg-purple-700 px-8 py-6 text-lg"
+            onClick={handleJoinClick}
+            disabled={isJoining || alreadyJoined}
+            className={`${alreadyJoined ? 'bg-green-600 hover:bg-green-700' : 'bg-purple-600 hover:bg-purple-700'} px-8 py-6 text-lg`}
           >
-            🔒 Verify to Join
+            {isJoining ? '🔄 Joining...' : alreadyJoined ? '✓ Already Joined' : isVerified ? '🔓 Join Group' : '🔒 Verify to Join'}
           </Button>
         </div>
       </div>
@@ -140,6 +233,12 @@ export default function GroupPage() {
       <VerificationDialog
         open={showVerificationDialog}
         onOpenChange={setShowVerificationDialog}
+        targetGroup={slug === 'exact-numbers' ? 'exact-numbers' : slug === '10-mrr-club' ? '10-mrr-club' : null}
+        onVerificationComplete={() => {
+          loadVerifiedProfile();
+          fetchBadges();
+          setShowVerificationDialog(false);
+        }}
       />
     </div>
   );

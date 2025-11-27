@@ -35,6 +35,7 @@ export async function GET() {
       timestamp: row.timestamp,
       displayName: row.display_name,
       revealExact: row.reveal_exact,
+      joinedGroups: row.joined_groups || [],
     }));
 
     return NextResponse.json({ badges });
@@ -67,9 +68,20 @@ export async function POST(request: NextRequest) {
     // Check if badge with this DID already exists
     const { data: existing, error: checkError } = await supabase
       .from('badges')
-      .select('did')
+      .select('did, joined_groups')
       .eq('did', badge.did)
       .maybeSingle();
+
+    // Calculate joined_groups array
+    let joinedGroupsArray: string[] = [];
+    if (existing && !checkError && existing.joined_groups) {
+      joinedGroupsArray = [...existing.joined_groups];
+    }
+    
+    // Add the new group if specified and not already present
+    if (badge.joinedGroup && !joinedGroupsArray.includes(badge.joinedGroup)) {
+      joinedGroupsArray.push(badge.joinedGroup);
+    }
 
     // Prepare data for database
     const badgeData = {
@@ -82,6 +94,7 @@ export async function POST(request: NextRequest) {
       timestamp: badge.timestamp,
       display_name: badge.displayName || null,
       reveal_exact: badge.revealExact || false,
+      joined_groups: joinedGroupsArray,
     };
 
     let result;

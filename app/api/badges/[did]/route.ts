@@ -133,3 +133,37 @@ export async function PUT(
   }
 }
 
+/**
+ * DELETE /api/badges/[did]
+ * Delete a badge by DID
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ did: string }> }
+) {
+  try {
+    const { did } = await params;
+
+    const { error } = await supabase
+      .from('badges')
+      .delete()
+      .eq('did', did);
+
+    if (error) {
+      console.error('Supabase delete error:', error);
+      return NextResponse.json(
+        { error: 'Failed to delete badge' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('API error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+

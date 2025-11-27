@@ -5,18 +5,28 @@ import Navigation from '@/components/Navigation';
 import GroupCard from '@/components/GroupCard';
 import HowItWorks from '@/components/HowItWorks';
 import VerificationDialog from '@/components/VerificationDialog';
+import VerificationStatusBadge from '@/components/VerificationStatusBadge';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { VerificationBadge } from '@/lib/types/verification';
+import { VerificationBadge, VerifiedProfile } from '@/lib/types/verification';
+import { getVerifiedProfile } from '@/lib/localStorage/verifiedProfile';
 
 export default function Home() {
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const [targetGroup, setTargetGroup] = useState<'exact-numbers' | '10-mrr-club' | null>(null);
   const [allBadges, setAllBadges] = useState<VerificationBadge[]>([]);
   const [loading, setLoading] = useState(true);
+  const [verifiedProfile, setVerifiedProfile] = useState<VerifiedProfile | null>(null);
 
   useEffect(() => {
     fetchBadges();
+    loadVerifiedProfile();
   }, []);
+
+  const loadVerifiedProfile = () => {
+    const profile = getVerifiedProfile();
+    setVerifiedProfile(profile);
+  };
 
   const fetchBadges = async () => {
     try {
@@ -34,7 +44,7 @@ export default function Home() {
 
   const getExactNumbersMembers = () => {
     return allBadges
-      .filter(badge => badge.revealExact && badge.metrics.mrr)
+      .filter(badge => badge.joinedGroups?.includes('exact-numbers'))
       .sort((a, b) => b.metrics.mrr - a.metrics.mrr)
       .map((badge, index) => ({
         rank: index + 1,
@@ -47,7 +57,7 @@ export default function Home() {
 
   const getTenMRRClubMembers = () => {
     return allBadges
-      .filter(badge => badge.metrics.mrr >= 10)
+      .filter(badge => badge.joinedGroups?.includes('10-mrr-club'))
       .map((badge, index) => ({
         rank: index + 1,
         did: badge.did,
@@ -72,10 +82,17 @@ export default function Home() {
             <span className="block text-primary">without revealing your data</span>
           </h1>
 
-          <div className="pt-2">
-            <Button onClick={() => setShowVerificationDialog(true)} className="bg-primary hover:bg-primary-dark text-primary-foreground">
-              Verify Startup
-            </Button>
+          <div className="pt-2 flex flex-col items-center gap-4">
+            {verifiedProfile ? (
+              <VerificationStatusBadge profile={verifiedProfile} />
+            ) : (
+              <Button onClick={() => {
+                setTargetGroup(null);
+                setShowVerificationDialog(true);
+              }} className="bg-primary hover:bg-primary-dark text-primary-foreground">
+                Verify Startup
+              </Button>
+            )}
           </div>
         </div>
       </section>
@@ -97,7 +114,15 @@ export default function Home() {
                 members={exactNumbersMembers}
                 slug="exact-numbers"
                 showExact={true}
-                onVerifyClick={() => setShowVerificationDialog(true)}
+                verifiedProfile={verifiedProfile}
+                onJoinSuccess={() => {
+                  loadVerifiedProfile();
+                  fetchBadges();
+                }}
+                onVerifyClick={() => {
+                  setTargetGroup('exact-numbers');
+                  setShowVerificationDialog(true);
+                }}
               />
 
               <GroupCard
@@ -108,7 +133,15 @@ export default function Home() {
                 members={tenMRRMembers}
                 slug="10-mrr-club"
                 showExact={false}
-                onVerifyClick={() => setShowVerificationDialog(true)}
+                verifiedProfile={verifiedProfile}
+                onJoinSuccess={() => {
+                  loadVerifiedProfile();
+                  fetchBadges();
+                }}
+                onVerifyClick={() => {
+                  setTargetGroup('10-mrr-club');
+                  setShowVerificationDialog(true);
+                }}
               />
             </div>
           )}
@@ -153,7 +186,18 @@ export default function Home() {
       {/* Verification Dialog */}
       <VerificationDialog
         open={showVerificationDialog}
-        onOpenChange={setShowVerificationDialog}
+        onOpenChange={(open) => {
+          setShowVerificationDialog(open);
+          if (!open) {
+            setTargetGroup(null);
+          }
+        }}
+        targetGroup={targetGroup}
+        onVerificationComplete={() => {
+          loadVerifiedProfile();
+          fetchBadges();
+          setShowVerificationDialog(false);
+        }}
       />
     </div>
   );
