@@ -2,13 +2,15 @@
 
 import { VerifiedProfile } from '@/lib/types/verification';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface VerificationStatusBadgeProps {
   profile: VerifiedProfile;
   onProfileCleared?: () => void;
+  onReverify?: () => void;
 }
 
-export default function VerificationStatusBadge({ profile }: VerificationStatusBadgeProps) {
+export default function VerificationStatusBadge({ profile, onReverify }: VerificationStatusBadgeProps) {
   const formatDID = (did: string) => {
     return did.slice(0, 20) + '...';
   };
@@ -30,6 +32,17 @@ export default function VerificationStatusBadge({ profile }: VerificationStatusB
       <Badge variant="outline" className="text-xs border-primary/50 bg-primary/10">
         ${profile.metrics.mrr} MRR
       </Badge>
+      
+      {onReverify && (
+        <Button 
+          onClick={onReverify}
+          variant="outline"
+          size="sm"
+          className="text-xs border-primary/50 hover:bg-primary/20"
+        >
+          🔄 Reverify
+        </Button>
+      )}
     </div>
   );
 }

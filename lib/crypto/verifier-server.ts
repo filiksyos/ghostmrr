@@ -19,10 +19,11 @@ export async function verifyBadgeServer(badge: VerificationBadge): Promise<boole
       return false;
     }
 
-    // Reconstruct message
+    // Reconstruct message (include accountHash if present for cryptographic binding)
     const message = JSON.stringify({
       metrics: badge.metrics,
       timestamp: badge.timestamp,
+      accountHash: badge.accountHash,
     });
 
     // Convert from base64 (Node.js Buffer)

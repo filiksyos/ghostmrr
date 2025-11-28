@@ -1,6 +1,6 @@
 {
   "name": "ghostmrr",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "type": "module",
   "description": "CLI to verify startup MRR using Stripe + Ed25519 DID signing",
   "main": "dist/index.js",

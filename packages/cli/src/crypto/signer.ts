@@ -3,16 +3,18 @@ import { MRRMetrics, VerificationBadge } from '../types/verification.js';
 import { loadOrCreateKeypair } from './keypair.js';
 
 export async function generateSignedVerification(
-  metrics: MRRMetrics
+  metrics: MRRMetrics,
+  accountHash?: string
 ): Promise<VerificationBadge> {
   // Load or create persistent Ed25519 keypair
   const { privateKey, publicKey, did } = await loadOrCreateKeypair();
 
-  // Create message to sign
+  // Create message to sign (include accountHash for cryptographic binding)
   const timestamp = new Date().toISOString();
   const message = JSON.stringify({
     metrics,
     timestamp,
+    accountHash,
   });
 
   // Sign message
@@ -29,6 +31,7 @@ export async function generateSignedVerification(
     publicKey: publicKeyBase64,
     signature: signatureBase64,
     timestamp,
+    accountHash,
   };
 }
 
@@ -36,10 +39,11 @@ export async function verifySignature(
   badge: VerificationBadge
 ): Promise<boolean> {
   try {
-    // Reconstruct message
+    // Reconstruct message (include accountHash if present)
     const message = JSON.stringify({
       metrics: badge.metrics,
       timestamp: badge.timestamp,
+      accountHash: badge.accountHash,
     });
 
     // Convert from base64

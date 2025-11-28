@@ -12,4 +12,5 @@ export interface VerificationBadge {
   publicKey: string;
   signature: string;
   timestamp: string;
+  accountHash?: string;
 }

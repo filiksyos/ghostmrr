@@ -11,14 +11,14 @@ export async function verifyCommand() {
   // Show pre-filled link for easy key creation
   console.log('🔑 To generate a safe, read-only API key:');
   console.log('   1. Click here: \x1b[36mhttps://dashboard.stripe.com/apikeys/create?name=GhostMRR&permissions[]=rak_subscription_read\x1b[0m');
-  console.log('   2. Click "Create key" and copy the restricted key (rk_live_... or rk_test_...)\n');
+  console.log('   2. Click "Create key" and copy the restricted key\n');
 
   // Prompt for Stripe API key
   const { apiKey } = await inquirer.prompt([
     {
-      type: 'password',
+      type: 'input',
       name: 'apiKey',
-      message: 'Enter your Stripe Restricted Key (rk_live_... or rk_test_...):',
+      message: 'Enter your Stripe Restricted Key:',
       validate: (input) => {
         if (!input.startsWith('rk_')) {
           return 'Invalid Stripe key format. Must be a restricted key starting with rk_';
@@ -33,8 +33,9 @@ export async function verifyCommand() {
   try {
     const stripe = new Stripe(apiKey, { apiVersion: '2025-11-17.clover' });
 
-    // Calculate metrics
-    const metrics = await calculateMetrics(stripe);
+    // Calculate metrics (includes accountHash)
+    const metricsWithHash = await calculateMetrics(stripe);
+    const { accountHash, ...metrics } = metricsWithHash;
 
     console.log('\n📊 Metrics calculated:');
     console.log(`   MRR: $${metrics.mrr.toLocaleString()}`);
@@ -43,8 +44,8 @@ export async function verifyCommand() {
 
     console.log('\n🔐 Generating cryptographic signature...');
 
-    // Generate signed verification
-    const verification = await generateSignedVerification(metrics);
+    // Generate signed verification with account hash
+    const verification = await generateSignedVerification(metrics, accountHash);
 
     // Write to file
     const outputPath = path.join(process.cwd(), 'verification.json');
@@ -56,9 +57,9 @@ export async function verifyCommand() {
     console.log(`   💡 Run 'ghostmrr did show' to see your persistent DID.`);
     console.log(`\n📄 Saved to: ${outputPath}`);
     console.log('\n🌐 Next steps:');
-    console.log('   1. Go to https://ghostmrr.app/verify');
-    console.log('   2. Paste the contents of verification.json');
-    console.log('   3. Get your verified badge!\n');
+    console.log('   1. Go to https://ghostmrr.com');
+    console.log('   2. Click "Verify Startup"');
+    console.log('   3. Paste the contents of verification.json\n');
   } catch (error: any) {
     console.error('\n❌ Error:', error.message);
     process.exit(1);
