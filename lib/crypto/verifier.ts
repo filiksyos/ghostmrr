@@ -25,10 +25,11 @@ export async function verifyBadge(badge: VerificationBadge): Promise<boolean> {
       return false;
     }
 
-    // Reconstruct message
+    // Reconstruct message (include accountHash if present for cryptographic binding)
     const message = JSON.stringify({
       metrics: badge.metrics,
       timestamp: badge.timestamp,
+      accountHash: badge.accountHash,
     });
 
     // Convert from base64 (browser-compatible)

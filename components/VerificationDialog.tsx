@@ -114,6 +114,7 @@ export default function VerificationDialog({ open, onOpenChange, targetGroup, on
         publicKey: verifiedBadge.publicKey,
         signature: verifiedBadge.signature,
         timestamp: verifiedBadge.timestamp,
+        accountHash: verifiedBadge.accountHash,
         verifiedAt: new Date().toISOString(),
         identityMode,
         displayName: identityMode === 'public' ? normalizeUrl(website) : undefined,

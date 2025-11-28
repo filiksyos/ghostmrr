@@ -84,7 +84,13 @@ export default function Home() {
 
           <div className="pt-2 flex flex-col items-center gap-4">
             {verifiedProfile ? (
-              <VerificationStatusBadge profile={verifiedProfile} />
+              <VerificationStatusBadge 
+                profile={verifiedProfile}
+                onReverify={() => {
+                  setTargetGroup(null);
+                  setShowVerificationDialog(true);
+                }}
+              />
             ) : (
               <Button onClick={() => {
                 setTargetGroup(null);

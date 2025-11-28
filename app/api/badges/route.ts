@@ -65,12 +65,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if badge with this DID already exists
-    const { data: existing, error: checkError } = await supabase
-      .from('badges')
-      .select('did, joined_groups')
-      .eq('did', badge.did)
-      .maybeSingle();
+    // Check if badge with this account_hash already exists (primary deduplication key)
+    let existing = null;
+    let checkError = null;
+    
+    if (badge.accountHash) {
+      // New verification with accountHash - check by account_hash first
+      const result = await supabase
+        .from('badges')
+        .select('did, joined_groups, timestamp, account_hash')
+        .eq('account_hash', badge.accountHash)
+        .maybeSingle();
+      
+      existing = result.data;
+      checkError = result.error;
+      
+      // Timestamp validation: reject if submitted verification is older
+      // Equal timestamps are allowed (e.g., joining groups with same verification.json)
+      // If a verification.json is compromised, user can generate a newer one to invalidate it
+      if (existing && !checkError) {
+        const existingTimestamp = new Date(existing.timestamp).getTime();
+        const newTimestamp = new Date(badge.timestamp).getTime();
+        
+        if (newTimestamp < existingTimestamp) {
+          return NextResponse.json(
+            { error: 'This verification is outdated. Please generate a fresh verification with the latest data.' },
+            { status: 400 }
+          );
+        }
+      }
+    } else {
+      // Old verification without accountHash - check by DID (backward compatibility)
+      const result = await supabase
+        .from('badges')
+        .select('did, joined_groups, timestamp, account_hash')
+        .eq('did', badge.did)
+        .maybeSingle();
+      
+      existing = result.data;
+      checkError = result.error;
+    }
 
     // Calculate joined_groups array
     let joinedGroupsArray: string[] = [];
@@ -92,6 +126,7 @@ export async function POST(request: NextRequest) {
       public_key: badge.publicKey,
       signature: badge.signature,
       timestamp: badge.timestamp,
+      account_hash: badge.accountHash || null,
       display_name: badge.displayName || null,
       reveal_exact: badge.revealExact || false,
       joined_groups: joinedGroupsArray,
@@ -99,13 +134,12 @@ export async function POST(request: NextRequest) {
 
     let result;
     if (existing && !checkError) {
-      // Update existing badge
-      const { data, error } = await supabase
-        .from('badges')
-        .update(badgeData)
-        .eq('did', badge.did)
-        .select()
-        .single();
+      // Update existing badge (use account_hash if available, otherwise use did)
+      const updateQuery = badge.accountHash
+        ? supabase.from('badges').update(badgeData).eq('account_hash', badge.accountHash)
+        : supabase.from('badges').update(badgeData).eq('did', badge.did);
+      
+      const { data, error } = await updateQuery.select().single();
 
       if (error) {
         console.error('Supabase update error:', error);

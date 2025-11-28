@@ -33,8 +33,9 @@ export async function verifyCommand() {
   try {
     const stripe = new Stripe(apiKey, { apiVersion: '2025-11-17.clover' });
 
-    // Calculate metrics
-    const metrics = await calculateMetrics(stripe);
+    // Calculate metrics (includes accountHash)
+    const metricsWithHash = await calculateMetrics(stripe);
+    const { accountHash, ...metrics } = metricsWithHash;
 
     console.log('\n📊 Metrics calculated:');
     console.log(`   MRR: $${metrics.mrr.toLocaleString()}`);
@@ -43,8 +44,8 @@ export async function verifyCommand() {
 
     console.log('\n🔐 Generating cryptographic signature...');
 
-    // Generate signed verification
-    const verification = await generateSignedVerification(metrics);
+    // Generate signed verification with account hash
+    const verification = await generateSignedVerification(metrics, accountHash);
 
     // Write to file
     const outputPath = path.join(process.cwd(), 'verification.json');

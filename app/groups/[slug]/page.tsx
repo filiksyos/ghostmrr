@@ -115,6 +115,7 @@ export default function GroupPage() {
         publicKey: verifiedProfile.publicKey,
         signature: verifiedProfile.signature,
         timestamp: verifiedProfile.timestamp,
+        accountHash: verifiedProfile.accountHash,
         displayName: verifiedProfile.displayName,
         joinedGroup: groupSlug,
       };
