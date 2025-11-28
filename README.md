@@ -4,13 +4,14 @@
 
 ## What is GhostMRR?
 
-GhostMRR lets indie founders prove their MRR (Monthly Recurring Revenue) without sharing sensitive data:
+GhostMRR is a web + CLI app that lets indie founders prove their MRR (Monthly Recurring Revenue) without sharing sensitive data:
 
 - ✅ **Local-first**: Query Stripe API on your machine only
 - ✅ **Cryptographically signed**: Ed25519 DID signatures
-- ✅ **Privacy-preserving**: Only share MRR tier ($1k+, $10k+, etc)
-- ✅ **No backend**: All verification happens client-side
+- ✅ **Privacy-preserving**: Only share MRR tier ($1k+, $10k+, etc) or exact numbers (your choice)
+- ✅ **Account-based deduplication**: Prevents duplicate verifications from the same Stripe account
 - ✅ **Instant**: `npx ghostmrr@latest verify` → get verified badge
+- ✅ **Join groups**: Compete on leaderboards or join exclusive clubs like the $10+ MRR Club
 
 ---
 
@@ -40,16 +41,18 @@ npx ghostmrr@latest verify
   },
   "publicKey": "...",
   "signature": "...",
-  "timestamp": "2025-11-25T12:34:56Z"
+  "timestamp": "2025-11-25T12:34:56Z",
+  "accountHash": "a1b2c3d4e5f6..."
 }
 ```
 
-### Frontend: Display Your Badge
+### Web App: Verify & Join Groups
 
-1. Go to [ghostmrr.app/verify](https://ghostmrr.app/verify)
-2. Paste your `verification.json`
+1. Go to [ghostmrr.com](https://ghostmrr.com)
+2. Click "Verify Startup" and paste your `verification.json`
 3. Get verified ✓ badge
-4. Share on leaderboard
+4. Join groups like "Exact Numbers Leaderboard" or ">$10 MRR Club"
+5. Compete on leaderboards and connect with other verified founders
 
 ---
 
@@ -68,8 +71,9 @@ ghosmrr/
 1. **CLI queries Stripe locally** (API key never leaves your machine)
 2. **Calculates MRR** from active subscriptions
 3. **Generates ephemeral Ed25519 keypair** (DID format)
-4. **Signs metrics + timestamp**
-5. **Frontend verifies signature** using public key (no backend)
+4. **Signs metrics + timestamp + account hash** (cryptographically binds to your Stripe account)
+5. **Web app verifies signature** client-side and stores badge in database
+6. **Join groups** to compete on leaderboards or join exclusive clubs
 
 ### Security: Restricted API Keys Only
 
@@ -98,8 +102,13 @@ The CLI will show you a direct link to create a restricted key with the correct 
 - Next.js 16 (App Router)
 - React 19
 - Tailwind CSS 3.4
-- Recharts (MRR visualization)
 - `@noble/ed25519` - Signature verification
+- Supabase - Database and API routes
+
+### Backend
+- Supabase (PostgreSQL database)
+- Next.js API routes for badge storage and retrieval
+- Account-based deduplication to prevent duplicate verifications
 
 ---
 
@@ -107,14 +116,14 @@ The CLI will show you a direct link to create a restricted key with the correct 
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Run CLI locally
 cd packages/cli
-npm run dev
+pnpm run dev
 
-# Run frontend
-npm run dev
+# Run frontend (single page app)
+pnpm run dev
 ```
 
 ---
@@ -127,9 +136,10 @@ npm run dev
 - ❌ Centralized verification = privacy concerns
 
 **Solution**: GhostMRR
-- ✅ Cryptographically verifiable
-- ✅ Privacy-preserving (only tier, not exact MRR)
-- ✅ No backend = no data exposure
+- ✅ Cryptographically verifiable (Ed25519 signatures)
+- ✅ Privacy-preserving (choose to share tier or exact MRR)
+- ✅ Account-based deduplication (one verification per Stripe account)
+- ✅ Join verified groups and compete on leaderboards
 - ✅ Open source = full transparency
 
 ---
@@ -150,7 +160,7 @@ MIT
 
 ## Contributing
 
-PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md)
+PRs welcome!
 
 ---
 
