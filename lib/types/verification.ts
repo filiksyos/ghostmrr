@@ -1,4 +1,4 @@
-// Shared types with CLI
+// Browser-based verification types
 
 export interface MRRMetrics {
   mrr: number;
@@ -7,12 +7,9 @@ export interface MRRMetrics {
 }
 
 export interface VerificationBadge {
-  did: string;
+  accountHash: string;
   metrics: MRRMetrics;
-  publicKey: string;
-  signature: string;
   timestamp: string;
-  accountHash?: string;
   displayName?: string;
   revealExact?: boolean;
   joinedGroup?: 'exact-numbers' | '10-mrr-club';
@@ -20,12 +17,9 @@ export interface VerificationBadge {
 }
 
 export interface VerifiedProfile {
-  did: string;
+  accountHash: string;
   metrics: MRRMetrics;
-  publicKey: string;
-  signature: string;
   timestamp: string;
-  accountHash?: string;
   verifiedAt: string; // when stored in localStorage
   identityMode: 'anonymous' | 'public'; // user's choice
   displayName?: string; // only if public

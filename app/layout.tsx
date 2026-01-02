@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'GhostMRR - Verify Your Startup Revenue',
   description:
-    'Cryptographically verify your MRR without exposing Stripe data. Zero-trust, DID-powered verification for indie hackers.',
-  keywords: ['MRR', 'startup', 'revenue', 'verification', 'stripe', 'DID'],
+    'Verify your MRR without exposing Stripe data. Browser-based, privacy-first verification for indie hackers.',
+  keywords: ['MRR', 'startup', 'revenue', 'verification', 'stripe', 'privacy', 'browser-based'],
   icons: {
     icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👻</text></svg>',
   },

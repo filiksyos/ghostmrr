@@ -38,10 +38,7 @@ export default function VerificationBadge({ badge }: Props) {
             </div>
           </div>
 
-          <div className="pt-4 border-t border-gray-700 space-y-2">
-            <div className="text-xs text-gray-500">
-              <span className="font-mono">DID:</span> {badge.did.slice(0, 32)}...
-            </div>
+          <div className="pt-4 border-t border-gray-700">
             <div className="text-xs text-gray-500">
               <span className="font-mono">Verified:</span> {formatDate(badge.timestamp)}
             </div>

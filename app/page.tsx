@@ -48,7 +48,7 @@ export default function Home() {
       .sort((a, b) => b.metrics.mrr - a.metrics.mrr)
       .map((badge, index) => ({
         rank: index + 1,
-        did: badge.did,
+        accountHash: badge.accountHash,
         displayName: badge.displayName,
         mrr: badge.metrics.mrr,
         verifiedAt: badge.timestamp,
@@ -60,7 +60,7 @@ export default function Home() {
       .filter(badge => badge.joinedGroups?.includes('10-mrr-club'))
       .map((badge, index) => ({
         rank: index + 1,
-        did: badge.did,
+        accountHash: badge.accountHash,
         displayName: badge.displayName,
         mrr: '>$10 MRR',
         verifiedAt: badge.timestamp,
