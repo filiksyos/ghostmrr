@@ -47,7 +47,7 @@ export default function VerificationDialog({ open, onOpenChange, targetGroup, on
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] bg-gray-900 border-gray-800">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800">
         <DialogHeader>
           {!success ? (
             <>
@@ -64,7 +64,7 @@ export default function VerificationDialog({ open, onOpenChange, targetGroup, on
             <>
               {error && (
                 <div className="p-4 bg-red-900/20 border border-red-500 rounded-lg">
-                  <p className="text-red-500 text-sm">{error}</p>
+                  <p className="text-red-500 text-sm break-words">{error}</p>
                 </div>
               )}
 

@@ -242,7 +242,7 @@ export default function StripeVerificationForm({
         <p className="text-xs text-gray-400">
           Don't have a restricted key?{' '}
           <a
-            href="https://dashboard.stripe.com/apikeys/create?name=GhostMRR&permissions%5B%5D=rak_subscription_read&permissions%5B%5D=rak_plan_read&permissions%5B%5D=rak_account_read"
+            href="https://dashboard.stripe.com/apikeys/create?name=GhostMRR&permissions%5B%5D=rak_subscription_read&permissions%5B%5D=rak_plan_read&permissions%5B%5D=rak_accounts_kyc_basic_read"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-400 hover:text-blue-300 underline"
@@ -308,7 +308,7 @@ export default function StripeVerificationForm({
       {/* Error Display */}
       {error && (
         <div className="p-4 bg-red-900/20 border border-red-800 rounded-md">
-          <p className="text-sm text-red-400">{error}</p>
+          <p className="text-sm text-red-400 break-words">{error}</p>
         </div>
       )}
 
