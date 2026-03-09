@@ -239,9 +239,6 @@ export async function calculateStripeMetrics(apiKey: string): Promise<{
   // Initialize Stripe client
   const stripe = new Stripe(apiKey);
 
-  // Get account information
-  const account = await stripe.accounts.retrieveCurrent();
-
   // Get all active subscriptions with pagination
   const allSubscriptions: Stripe.Subscription[] = [];
   let hasMore = true;
@@ -266,8 +263,14 @@ export async function calculateStripeMetrics(apiKey: string): Promise<{
   const { mrr, customers } = calculateMRR(allSubscriptions);
   const customerCount = customers.size;
 
-  // Generate account hash
-  const accountHash = await generateAccountHash(account.id);
+  // Generate account hash from customer IDs (avoids KYC permission which can't be combined with others)
+  const sortedCustomerIds = Array.from(customers).sort();
+  if (sortedCustomerIds.length === 0) {
+    throw new Error(
+      'At least one active subscription is required to verify. The account hash is derived from your subscription data to avoid requiring additional Stripe permissions.'
+    );
+  }
+  const accountHash = await generateAccountHash(sortedCustomerIds.join('|'));
 
   // Determine tier
   const tier = getTierLabel(mrr);

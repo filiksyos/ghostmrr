@@ -242,7 +242,7 @@ export default function StripeVerificationForm({
         <p className="text-xs text-gray-400">
           Don't have a restricted key?{' '}
           <a
-            href="https://dashboard.stripe.com/apikeys/create?name=GhostMRR&permissions%5B%5D=rak_subscription_read&permissions%5B%5D=rak_plan_read&permissions%5B%5D=rak_accounts_kyc_basic_read"
+            href="https://dashboard.stripe.com/apikeys/create?name=GhostMRR&permissions%5B%5D=rak_subscription_read&permissions%5B%5D=rak_plan_read"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-400 hover:text-blue-300 underline"
