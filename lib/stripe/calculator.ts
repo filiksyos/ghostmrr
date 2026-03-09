@@ -240,7 +240,7 @@ export async function calculateStripeMetrics(apiKey: string): Promise<{
   const stripe = new Stripe(apiKey);
 
   // Get account information
-  const account = await stripe.account.retrieve();
+  const account = await stripe.accounts.retrieveCurrent();
 
   // Get all active subscriptions with pagination
   const allSubscriptions: Stripe.Subscription[] = [];
@@ -248,7 +248,7 @@ export async function calculateStripeMetrics(apiKey: string): Promise<{
   let startingAfter: string | undefined = undefined;
 
   while (hasMore) {
-    const response = await stripe.subscriptions.list({
+    const response: Stripe.ApiList<Stripe.Subscription> = await stripe.subscriptions.list({
       status: 'active',
       limit: 100,
       ...(startingAfter ? { starting_after: startingAfter } : {}),

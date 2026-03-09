@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import crypto from 'crypto';
 
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     // Get account information
     let account: Stripe.Account;
     try {
-      account = await stripe.account.retrieve();
+      account = await stripe.accounts.retrieveCurrent();
     } catch (error: any) {
       if (error.statusCode === 401) {
         return NextResponse.json(
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     let startingAfter: string | undefined = undefined;
 
     while (hasMore) {
-      const response = await stripe.subscriptions.list({
+      const response: Stripe.ApiList<Stripe.Subscription> = await stripe.subscriptions.list({
         status: 'active',
         limit: 100,
         ...(startingAfter ? { starting_after: startingAfter } : {}),
