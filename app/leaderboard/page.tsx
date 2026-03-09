@@ -63,7 +63,7 @@ export default function LeaderboardPage() {
         ) : (
           <div className="space-y-4">
             {badges.map((badge, index) => (
-              <div key={badge.did} className="relative">
+              <div key={badge.accountHash} className="relative">
                 <div className="absolute -left-12 top-4 text-2xl font-bold text-gray-600">
                   #{index + 1}
                 </div>

@@ -11,7 +11,7 @@ import { checkGroupEligibility, hasJoinedGroup, addGroupToProfile } from '@/lib/
 
 interface Member {
   rank: number;
-  did: string;
+  accountHash: string;
   displayName?: string;
   mrr: string | number;
   verifiedAt: string;
@@ -88,12 +88,9 @@ export default function GroupCard({
     try {
       // Submit to backend
       const badge = {
-        did: verifiedProfile.did,
-        metrics: verifiedProfile.metrics,
-        publicKey: verifiedProfile.publicKey,
-        signature: verifiedProfile.signature,
-        timestamp: verifiedProfile.timestamp,
         accountHash: verifiedProfile.accountHash,
+        metrics: verifiedProfile.metrics,
+        timestamp: verifiedProfile.timestamp,
         displayName: verifiedProfile.displayName,
         joinedGroup: groupSlug,
       };
@@ -159,9 +156,9 @@ export default function GroupCard({
         <div className="space-y-1">
           {visibleMembers.map((member) => (
             <MemberRow
-              key={member.did}
+              key={member.accountHash}
               rank={member.rank}
-              did={member.did}
+              accountHash={member.accountHash}
               displayName={member.displayName}
               mrr={member.mrr}
               verifiedAt={member.verifiedAt}

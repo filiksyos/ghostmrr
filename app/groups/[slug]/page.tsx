@@ -110,12 +110,9 @@ export default function GroupPage() {
     try {
       // Submit to backend
       const badge = {
-        did: verifiedProfile.did,
-        metrics: verifiedProfile.metrics,
-        publicKey: verifiedProfile.publicKey,
-        signature: verifiedProfile.signature,
-        timestamp: verifiedProfile.timestamp,
         accountHash: verifiedProfile.accountHash,
+        metrics: verifiedProfile.metrics,
+        timestamp: verifiedProfile.timestamp,
         displayName: verifiedProfile.displayName,
         joinedGroup: groupSlug,
       };
@@ -207,9 +204,9 @@ export default function GroupPage() {
             <div className="space-y-1">
               {badges.map((badge, index) => (
                 <MemberRow
-                  key={badge.did}
+                  key={badge.accountHash}
                   rank={index + 1}
-                  did={badge.did}
+                  accountHash={badge.accountHash}
                   displayName={badge.displayName}
                   mrr={config.showExact ? badge.metrics.mrr : '>$10 MRR'}
                   verifiedAt={badge.timestamp}

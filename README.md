@@ -1,114 +1,134 @@
 # 👻 GhostMRR
 
-**Verify your startup revenue without exposing your Stripe data. Zero-trust, DID-powered.**
+**Verify your startup revenue without exposing your Stripe data. Browser-based, privacy-first.**
 
 ## What is GhostMRR?
 
-GhostMRR is a web + CLI app that lets indie founders prove their MRR (Monthly Recurring Revenue) without sharing sensitive data:
+GhostMRR is a web app that lets indie founders prove their MRR (Monthly Recurring Revenue) without sharing sensitive data:
 
-- ✅ **Local-first**: Query Stripe API on your machine only
-- ✅ **Cryptographically signed**: Ed25519 DID signatures
+- ✅ **Browser-based**: Query Stripe API directly in your browser
 - ✅ **Privacy-preserving**: Only share MRR tier ($1k+, $10k+, etc) or exact numbers (your choice)
-- ✅ **Account-based deduplication**: Prevents duplicate verifications from the same Stripe account
-- ✅ **Instant**: `npx ghostmrr@latest verify` → get verified badge
+- ✅ **Unique account verification**: One verification per Stripe account using accountHash
 - ✅ **Join groups**: Compete on leaderboards or join exclusive clubs like the $10+ MRR Club
 
 ---
 
 ## Quick Start
 
-### CLI: Verify Your MRR
+### Verify Your MRR in 2 Steps
 
-```bash
-# Run CLI (no install needed)
-npx ghostmrr@latest verify
+1. **Visit [ghostmrr.com](https://ghostmrr.com)**
+2. **Click "Verify Startup"** and paste your Stripe API key
+3. **Done!** Your MRR is calculated instantly and you're verified ✓
 
-# Follow prompts:
-# 1. Click the pre-filled link to create a restricted API key (one-click setup)
-# 2. Paste your restricted key (rk_live_... or rk_test_...)
-# 3. CLI queries Stripe → calculates MRR
-# 4. Generates signed verification.json
-```
+**What happens:**
+- Browser queries Stripe API (key never leaves your device)
+- MRR calculated from active subscriptions
+- Unique `accountHash` generated from your Stripe account ID
+- Data submitted to server: `{accountHash, mrr, customers, tier, displayName}`
+- Your Stripe key is optionally stored encrypted in localStorage for easy re-verification
 
-**Output: `verification.json`**
-```json
-{
-  "did": "did:key:z6Mkf...",
-  "metrics": {
-    "mrr": 5000,
-    "customers": 45,
-    "tier": "$1k+"
-  },
-  "publicKey": "...",
-  "signature": "...",
-  "timestamp": "2025-11-25T12:34:56Z",
-  "accountHash": "a1b2c3d4e5f6..."
-}
-```
+**Privacy:**
+- ✅ API key stays in your browser (never sent to server)
+- ✅ Only MRR metrics and accountHash are submitted
+- ✅ Choose to show exact numbers or stay anonymous
+- ✅ Re-verify anytime by clicking "Re-verify" (uses stored key)
 
-### Web App: Verify & Join Groups
+### Join Groups & Compete
 
-1. Go to [ghostmrr.com](https://ghostmrr.com)
-2. Click "Verify Startup" and paste your `verification.json`
-3. Get verified ✓ badge
-4. Join groups like "Exact Numbers Leaderboard" or ">$10 MRR Club"
-5. Compete on leaderboards and connect with other verified founders
+After verification:
+- Join "Exact Numbers Leaderboard" to show your real MRR
+- Join exclusive clubs like ">$10k MRR Club"
+- Compete on leaderboards with other verified founders
 
 ---
 
 ## Architecture
 
 ```
-ghosmrr/
-├── packages/cli/        # NPM package for CLI
-├── packages/shared/     # Shared TypeScript types
+ghostmrr/
 ├── app/                 # Next.js 16 frontend
-└── components/          # Verification badge UI
+├── components/          # React components (verification form, badges)
+├── lib/
+│   ├── stripe/         # Browser-based Stripe calculator
+│   ├── types/          # TypeScript interfaces
+│   └── supabase/       # Database client
+└── supabase/
+    └── migrations/     # Database schema
 ```
 
 ### How It Works
 
-1. **CLI queries Stripe locally** (API key never leaves your machine)
-2. **Calculates MRR** from active subscriptions
-3. **Generates ephemeral Ed25519 keypair** (DID format)
-4. **Signs metrics + timestamp + account hash** (cryptographically binds to your Stripe account)
-5. **Web app verifies signature** client-side and stores badge in database
-6. **Join groups** to compete on leaderboards or join exclusive clubs
+**Step 1**: Paste your Stripe API key in the browser (key never leaves your device)
 
-### Security: Restricted API Keys Only
+**Step 2**: Browser queries Stripe, calculates MRR and accountHash, and submits the minimal payload `{accountHash, mrr, customers, tier, displayName}` to the server
 
-**GhostMRR only accepts restricted API keys** (`rk_live_...` or `rk_test_...`) for security. Restricted keys are read-only and safer:
+```mermaid
+sequenceDiagram
+    actor User
+    participant Browser
+    participant Stripe
+    participant Server
 
-- ✅ **Read-only**: Can only read subscription data, not modify anything
-- ✅ **Minimal permissions**: Only needs `Subscriptions: Read` permission
-- ✅ **One-click setup**: The CLI provides a pre-filled link that auto-configures everything
+    User->>Browser: Paste Stripe API key
+    Browser->>Stripe: Query subscriptions + account
+    Stripe-->>Browser: Return data
+    Browser->>Browser: Calculate MRR + accountHash
+    Browser->>Server: POST {accountHash, mrr, tier, displayName}
+    Server->>Server: Upsert by accountHash
+    Server-->>Browser: Success ✓
+```
 
-The CLI will show you a direct link to create a restricted key with the correct permissions. Just click, create, and paste!
+### Security: Browser-Based Privacy
 
-**Why restricted keys?** Even if the key is exposed, it can only read data, not perform operations or access sensitive information.
+**Your Stripe API key never leaves your browser:**
+
+- ✅ **Client-side only**: All Stripe queries happen in your browser
+- ✅ **No server access**: Server never sees your API key
+- ✅ **localStorage encryption**: Key stored encrypted for re-verification convenience
+- ✅ **Restricted keys recommended**: Use `rk_live_...` or `rk_test_...` for read-only access
+- ✅ **Minimal data sent**: Only `accountHash` (SHA-256 hash), MRR metrics, and display name
+
+**What is accountHash?**
+- SHA-256 hash of your Stripe account ID
+- Acts as unique identifier (one verification per Stripe account)
+- Prevents duplicate verifications
+- Allows you to update your MRR over time
+- Cannot be reverse-engineered to reveal your Stripe account
+
+**Recommended: Use Restricted API Keys**
+Create a restricted key with only `Subscriptions: Read` permission for maximum security.
 
 ---
 
 ## Tech Stack
 
-### CLI
-- Node.js + TypeScript
-- `stripe` - Query Stripe API
-- `@noble/ed25519` - Cryptographic signing
-- `commander` - CLI framework
-- `inquirer` - Interactive prompts
-
 ### Frontend
 - Next.js 16 (App Router)
 - React 19
 - Tailwind CSS 3.4
-- `@noble/ed25519` - Signature verification
-- Supabase - Database and API routes
+- Web Crypto API (SHA-256 for accountHash)
+- Stripe API (browser-based queries)
+- Supabase Client
 
 ### Backend
 - Supabase (PostgreSQL database)
 - Next.js API routes for badge storage and retrieval
-- Account-based deduplication to prevent duplicate verifications
+- Account-based deduplication using `accountHash` unique constraint
+
+### Database Schema
+```sql
+CREATE TABLE verifications (
+  id UUID PRIMARY KEY,
+  account_hash TEXT UNIQUE NOT NULL,  -- Unique identifier
+  display_name TEXT,
+  mrr INTEGER NOT NULL,
+  tier TEXT NOT NULL,
+  customers INTEGER,
+  verified_at TIMESTAMP,
+  updated_at TIMESTAMP
+);
+```
 
 ---
 
@@ -118,13 +138,22 @@ The CLI will show you a direct link to create a restricted key with the correct 
 # Install dependencies
 pnpm install
 
-# Run CLI locally
-cd packages/cli
+# Set up environment variables
+cp .env.example .env.local
+# Add your Supabase URL and anon key
+
+# Run development server
 pnpm run dev
 
-# Run frontend (single page app)
-pnpm run dev
+# Open http://localhost:3000
 ```
+
+**Project Structure:**
+- `app/` - Next.js pages and API routes
+- `components/` - React components (StripeVerificationForm, badges, etc.)
+- `lib/stripe/calculator.ts` - Browser-based MRR calculation
+- `lib/types/verification.ts` - TypeScript interfaces
+- `supabase/migrations/` - Database migrations
 
 ---
 
@@ -133,12 +162,14 @@ pnpm run dev
 **Problem**: Founders want to share revenue milestones, but:
 - ❌ Sharing Stripe dashboard = security risk
 - ❌ Self-reported numbers = not trustworthy
-- ❌ Centralized verification = privacy concerns
+- ❌ Complex CLI tools = friction for non-technical users
 
 **Solution**: GhostMRR
-- ✅ Cryptographically verifiable (Ed25519 signatures)
-- ✅ Privacy-preserving (choose to share tier or exact MRR)
-- ✅ Account-based deduplication (one verification per Stripe account)
+- ✅ Browser-based verification (no CLI, no terminal)
+- ✅ Privacy-preserving (API key never leaves browser)
+- ✅ Unique account verification (accountHash prevents duplicates)
+- ✅ Choose privacy level (exact MRR or tier ranges)
+- ✅ Easy re-verification (stored encrypted key)
 - ✅ Join verified groups and compete on leaderboards
 - ✅ Open source = full transparency
 
@@ -147,8 +178,8 @@ pnpm run dev
 ## Inspired By
 
 - [TrustMRR](https://github.com/sagarshende23/trustmrr) - UI/UX inspiration
-- Decentralized Identifiers (DIDs)
-- Zero-knowledge proofs philosophy
+- Privacy-first web applications
+- Browser-based cryptography (Web Crypto API)
 
 ---
 

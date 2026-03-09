@@ -4,7 +4,7 @@ import { ExternalLink } from 'lucide-react';
 
 interface MemberRowProps {
   rank: number;
-  did: string;
+  accountHash: string;
   displayName?: string;
   mrr: string | number;
   verifiedAt: string;
@@ -13,7 +13,7 @@ interface MemberRowProps {
 
 export default function MemberRow({
   rank,
-  did,
+  accountHash,
   displayName,
   mrr,
   verifiedAt,
@@ -48,7 +48,7 @@ export default function MemberRow({
     return mrr;
   };
 
-  const name = displayName || `Anonymous #${did.slice(-3)}`;
+  const name = displayName || `Anonymous #${accountHash.slice(-6)}`;
   
   // Check if displayName is a URL
   const isUrl = displayName && displayName.match(/^https?:\/\//i);
